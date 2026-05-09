@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IronLab">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="description" content="IronLab V.10 — Programmazione annuale bodybuilding Marco — Metodo Prof. Emilio They">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='38' fill='%230a0a0a'/><text x='50%' y='56%' font-family='Arial Black' font-size='72' fill='%23e8ff47' text-anchor='middle' dominant-baseline='middle'>IL</text></svg>">
+<title>IRONLAB V.10</title>
+<style>
+:root {
+  --bg:#0a0a0a; --s1:#111; --s2:#1a1a1a; --s3:#222; --bd:#2a2a2a;
+  --acc:#e8ff47; --acc2:#ff6b35; --tx:#f0f0f0; --mu:#555;
+  --ok:#4ade80; --fail:#f87171; --warn:#fbbf24; --purple:#a78bfa;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{height:100%;overscroll-behavior:none;}
+body{background:var(--bg);color:var(--tx);font-family:'Helvetica Neue',Arial,sans-serif;min-height:100%;overscroll-behavior:none;}
+
+/* NOISE */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.35;}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:200;background:rgba(10,10,10,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);padding:calc(14px + var(--safe-top)) 20px 14px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Arial Black',Impact,sans-serif;font-size:22px;letter-spacing:5px;color:var(--acc);line-height:1;}
+.logo span{color:var(--mu);}
+.hdr-r{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+.hbadge{background:var(--s2);border:1px solid var(--bd);padding:3px 10px;border-radius:2px;font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;white-space:nowrap;}
+.hbadge.a{color:var(--acc);} .hbadge.a2{color:var(--acc2);}
+
+/* INSTALL BANNER */
+#installBanner{display:none;position:fixed;bottom:calc(64px + var(--safe-bot));left:12px;right:12px;z-index:300;background:var(--s2);border:1px solid var(--acc);border-radius:6px;padding:12px 16px;display:none;align-items:center;justify-content:space-between;gap:10px;animation:slideUp .3s ease;}
+#installBanner.show{display:flex;}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.ib-txt{font-size:12px;color:var(--tx);line-height:1.5;}
+.ib-txt strong{color:var(--acc);font-size:13px;}
+.ib-btns{display:flex;gap:6px;flex-shrink:0;}
+.ib-btn{border:1px solid var(--bd);background:none;color:var(--mu);font-size:11px;padding:5px 10px;border-radius:3px;cursor:pointer;}
+.ib-btn.primary{background:var(--acc);color:#000;border-color:var(--acc);font-weight:700;}
+
+/* OFFLINE BADGE */
+#offlineBadge{display:none;position:fixed;top:calc(60px + var(--safe-top));right:12px;z-index:250;background:#1a0a0a;border:1px solid rgba(248,113,113,.4);border-radius:3px;padding:4px 10px;font-family:'Courier New',monospace;font-size:9px;color:#f87171;letter-spacing:1px;}
+#offlineBadge.show{display:block;}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(10,10,10,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--bd);display:flex;padding-bottom:var(--safe-bot);}
+.bnt{flex:1;border:none;background:none;color:var(--mu);padding:12px 6px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .15s;font-size:9px;letter-spacing:.5px;text-transform:uppercase;font-family:'Courier New',monospace;}
+.bnt svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.bnt.active{color:var(--acc);}
+.bnt.active svg{filter:drop-shadow(0 0 6px rgba(232,255,71,.5));}
+
+/* CONTENT */
+.content{padding:18px 16px calc(80px + var(--safe-bot));max-width:900px;margin:0 auto;}
+.panel{display:none;animation:fu .22s ease;}
+.panel.active{display:block;}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* TYPOGRAPHY */
+.stitle{font-family:'Arial Black',Impact,sans-serif;font-size:28px;letter-spacing:3px;line-height:1;margin-bottom:3px;}
+.ssub{font-size:10px;color:var(--mu);letter-spacing:1px;margin-bottom:18px;text-transform:uppercase;}
+.aline{width:32px;height:3px;background:var(--acc);margin-bottom:16px;}
+
+/* MESO NAV */
+.meso-nav{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;}
+.mbtn{background:var(--s2);border:1px solid var(--bd);color:var(--mu);padding:6px 11px;font-family:'Courier New',monospace;font-size:9px;cursor:pointer;border-radius:3px;transition:all .15s;letter-spacing:.5px;white-space:nowrap;}
+.mbtn:active{transform:scale(.97);}
+.mbtn.active{background:var(--acc2);color:#000;border-color:var(--acc2);font-weight:700;}
+
+/* WEEK NAV */
+.wk-nav{display:flex;gap:3px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.wlbl{font-family:'Courier New',monospace;font-size:8px;color:var(--mu);letter-spacing:1px;text-transform:uppercase;margin-right:4px;}
+.wbtn{background:var(--s2);border:1px solid var(--bd);color:var(--mu);padding:5px 9px;font-family:'Courier New',monospace;font-size:9px;cursor:pointer;border-radius:3px;transition:all .15s;}
+.wbtn:active{transform:scale(.95);}
+.wbtn.active{background:var(--acc);color:#000;border-color:var(--acc);font-weight:700;}
+.wbtn.dl{border-color:rgba(167,139,250,.4);color:var(--purple);}
+.wbtn.dl.active{background:#6d28d9;color:#fff;border-color:#6d28d9;}
+
+/* DAY CARD */
+.dc{background:var(--s1);border:1px solid var(--bd);border-radius:6px;margin-bottom:10px;overflow:hidden;}
+.dc-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .15s;-webkit-tap-highlight-color:transparent;}
+.dc-hdr:active{background:var(--s2);}
+.dc-lbl{font-family:'Arial Black',Impact,sans-serif;font-size:14px;letter-spacing:1.5px;line-height:1.2;}
+.dc-foc{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;}
+.dc-tog{color:var(--mu);font-size:14px;transition:transform .25s;flex-shrink:0;margin-left:8px;}
+.dc.open .dc-tog{transform:rotate(180deg);}
+.dc-body{display:none;padding:12px 14px;}
+.dc.open .dc-body{display:block;}
+
+/* EXERCISE */
+.ex{background:var(--s2);border:1px solid var(--bd);border-radius:4px;padding:11px 12px;margin-bottom:9px;}
+.ex-n{font-family:'Arial Black',Impact,sans-serif;font-size:13px;letter-spacing:.5px;margin-bottom:2px;line-height:1.3;}
+.ex-m{font-size:9px;color:var(--mu);font-family:'Courier New',monospace;margin-bottom:7px;line-height:1.4;}
+.tech{background:rgba(255,107,53,.07);border:1px solid rgba(255,107,53,.2);border-radius:3px;padding:6px 9px;margin-bottom:7px;font-size:11px;line-height:1.65;color:#ffb899;}
+.tech strong{color:var(--acc2);}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;min-width:340px;}
+th{font-size:8px;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);padding:5px 4px;text-align:left;border-bottom:1px solid var(--bd);}
+td{padding:6px 4px;vertical-align:middle;}
+tr:not(:last-child) td{border-bottom:1px solid rgba(255,255,255,.03);}
+
+/* WEIGHT INPUT */
+.wi{font-family:'Courier New',monospace;font-size:14px;font-weight:700;color:var(--acc);background:rgba(232,255,71,.06);border:1px solid rgba(232,255,71,.3);padding:4px 4px;border-radius:3px;width:58px;text-align:center;outline:none;transition:all .2s;-webkit-appearance:none;}
+.wi:focus{border-color:var(--acc);background:rgba(232,255,71,.14);}
+.wi::placeholder{color:var(--mu);font-size:8px;}
+.wi:disabled{opacity:1;}
+.wi-pre{border-color:rgba(232,255,71,.55);background:rgba(232,255,71,.09);}
+.edit-btn{border:1px solid var(--bd);background:none;color:var(--mu);font-size:12px;padding:3px 6px;border-radius:2px;cursor:pointer;}
+
+/* SUGGESTION */
+.sw{display:inline-flex;align-items:center;font-family:'Courier New',monospace;font-size:9px;padding:2px 6px;border-radius:2px;white-space:nowrap;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:var(--ok);}
+.sw.hold{background:rgba(251,146,60,.1);border-color:rgba(251,146,60,.3);color:#fb923c;}
+.sw.down{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);color:var(--fail);}
+.sw.warn{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3);color:var(--warn);}
+.sw.dl{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.3);color:var(--purple);}
+
+/* RPE TARGET */
+.rt{font-family:'Courier New',monospace;font-size:10px;padding:2px 5px;border-radius:2px;font-weight:700;}
+.r6{background:rgba(74,222,128,.15);color:var(--ok);}
+.r7{background:rgba(251,191,36,.15);color:var(--warn);}
+.r8{background:rgba(251,146,60,.15);color:#fb923c;}
+.r9{background:rgba(248,113,113,.15);color:var(--fail);}
+
+/* BUTTONS */
+.fbb{border:1px solid var(--bd);background:none;color:var(--mu);font-size:9px;font-family:'Courier New',monospace;padding:4px 8px;border-radius:3px;cursor:pointer;transition:all .12s;white-space:nowrap;}
+.fbb:active{transform:scale(.94);}
+.fbb.ok{background:rgba(74,222,128,.15);border-color:var(--ok);color:var(--ok);}
+.fbb.fail{background:rgba(248,113,113,.15);border-color:var(--fail);color:var(--fail);}
+.fbb.rs{background:rgba(232,255,71,.15);border-color:var(--acc);color:var(--acc);}
+.fbrow{display:flex;gap:3px;flex-wrap:wrap;}
+
+/* ADVICE BOX */
+.adv{display:none;margin-top:6px;padding:7px 10px;background:rgba(232,255,71,.04);border:1px solid rgba(232,255,71,.15);border-radius:3px;font-size:10px;color:var(--acc);font-family:'Courier New',monospace;line-height:1.6;}
+.adv.show{display:block;}
+
+/* NOTE/TIP BOXES */
+.nb{background:var(--s2);border:1px solid var(--bd);border-radius:3px;padding:8px 12px;font-size:10px;color:var(--mu);line-height:1.7;margin-top:4px;}
+.nb em{color:var(--acc);font-style:normal;} .nb strong{color:var(--tx);}
+.tip{background:rgba(255,107,53,.07);border:1px solid rgba(255,107,53,.22);border-radius:4px;padding:10px 13px;font-size:11px;line-height:1.7;margin-bottom:12px;color:#ffb899;}
+.tip strong{color:var(--acc2);}
+.prog{background:rgba(232,255,71,.04);border:1px solid rgba(232,255,71,.15);border-radius:3px;padding:10px 12px;margin-top:10px;font-size:10px;line-height:1.7;color:#c8d490;}
+.prog strong{color:var(--acc);font-family:'Courier New',monospace;}
+
+/* OVERVIEW */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.stat{background:var(--s2);border:1px solid var(--bd);border-radius:4px;padding:10px;text-align:center;}
+.sv{font-family:'Arial Black',Impact,sans-serif;font-size:22px;color:var(--acc);}
+.sl{font-size:8px;color:var(--mu);text-transform:uppercase;letter-spacing:.8px;margin-top:1px;}
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:12px;}
+.ov-card{background:var(--s1);border:1px solid var(--bd);border-radius:4px;padding:11px;}
+.ov-ph{font-family:'Courier New',monospace;font-size:8px;color:var(--acc2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+.ov-nm{font-family:'Arial Black',Impact,sans-serif;font-size:14px;letter-spacing:.5px;margin-bottom:4px;}
+.ov-mt{font-size:10px;color:var(--mu);line-height:1.55;}
+.mob{display:inline-block;padding:1px 7px;border-radius:2px;font-family:'Courier New',monospace;font-size:7px;letter-spacing:.8px;margin-bottom:4px;}
+.mob.def{background:rgba(39,174,96,.2);color:#27ae60;border:1px solid rgba(39,174,96,.3);}
+.mob.mass{background:rgba(212,160,23,.2);color:#d4a017;border:1px solid rgba(212,160,23,.3);}
+.mob.base{background:rgba(41,128,185,.2);color:#2980b9;border:1px solid rgba(41,128,185,.3);}
+.mob.rest{background:rgba(120,120,120,.2);color:#888;border:1px solid rgba(120,120,120,.3);}
+
+/* EXPORT BUTTON */
+.exp-btn{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--bd);color:var(--mu);padding:10px 14px;border-radius:4px;cursor:pointer;font-family:'Courier New',monospace;font-size:10px;letter-spacing:1px;transition:all .15s;width:100%;margin-top:10px;}
+.exp-btn:active{transform:scale(.98);}
+.exp-btn:hover{border-color:var(--acc);color:var(--acc);}
+.exp-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
+
+/* RPE GUIDE */
+.rpe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;margin-top:8px;}
+.rpe-item{background:var(--s2);border:1px solid var(--bd);border-radius:3px;padding:8px 10px;display:flex;align-items:center;gap:8px;}
+.rpe-n{font-family:'Arial Black',Impact,sans-serif;font-size:18px;min-width:28px;}
+.rpe-d{font-size:10px;color:var(--mu);line-height:1.4;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px;}
+
+@media(max-width:400px){
+  .stat-row{grid-template-columns:repeat(2,1fr);}
+  .ex-n{font-size:12px;}
+  table{min-width:300px;}
+  .wi{width:50px;font-size:12px;}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">IRON<span>LAB</span></div>
+  <div class="hdr-r">
+    <div class="hbadge a2" id="mesoBadge">M1 · RIENTRO</div>
+    <div class="hbadge a" id="wkBadge">S.1</div>
+  </div>
+</div>
+
+<div id="offlineBadge">OFFLINE</div>
+
+<div id="installBanner">
+  <div class="ib-txt"><strong>Installa IronLab</strong><br>Aggiungilo alla home screen per usarlo come app</div>
+  <div class="ib-btns">
+    <button class="ib-btn" onclick="dismissInstall()">No</button>
+    <button class="ib-btn primary" onclick="doInstall()">Installa</button>
+  </div>
+</div>
+
+<!-- PANELS -->
+<div id="tab-ov" class="panel active content">
+  <div class="stitle">PANORAMICA</div>
+  <div class="ssub">Programmazione Annuale · Metodo They</div>
+  <div class="aline"></div>
+  <div class="stat-row">
+    <div class="stat"><div class="sv">9</div><div class="sl">Mesocicli</div></div>
+    <div class="stat"><div class="sv">~40</div><div class="sl">Settimane</div></div>
+    <div class="stat"><div class="sv">3–4</div><div class="sl">Allenamenti</div></div>
+    <div class="stat"><div class="sv">They</div><div class="sl">Metodo</div></div>
+  </div>
+  <div class="tip"><strong>REGOLA D'ORO:</strong> Inserisci sempre il peso, l'RPE reale e segna se hai chiuso la serie. Il sistema calcola automaticamente il carico per la settimana successiva. I dati vengono salvati localmente sul dispositivo.</div>
+  <button class="exp-btn" onclick="exportData()">
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    ESPORTA DATI (JSON)
+  </button>
+  <label class="exp-btn" style="cursor:pointer;" onclick="document.getElementById('importFile').click()">
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    IMPORTA DATI (JSON)
+  </label>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+  <div class="ov-grid">
+    <div class="ov-card"><div class="ov-ph">Maggio · 4 sett.</div><div class="mob base">BASE</div><div class="ov-nm">M1 — Riattivazione</div><div class="ov-mt">Full Body Slow-Motion · RPE 5–7 · 3×/sett</div></div>
+    <div class="ov-card"><div class="ov-ph">Giu–Lug · 6–8 sett.</div><div class="mob def">DEFIN.</div><div class="ov-nm">M2 — Shawn Ray</div><div class="ov-mt">Split 4×/sett · RPE 7–8 · Forza+Definizione</div></div>
+    <div class="ov-card"><div class="ov-ph">Agosto · 6–8 sett.</div><div class="mob def">DEFIN.</div><div class="ov-nm">M3 — Bulk</div><div class="ov-mt">Full Body 3×/sett · RPE 7–8 · CAT+Isotensivo</div></div>
+    <div class="ov-card"><div class="ov-ph">Settembre · 2–3 sett.</div><div class="mob rest">TRANS.</div><div class="ov-nm">T1 — Recupero</div><div class="ov-mt">Carichi 60% · RPE max 6 · Riposo attivo</div></div>
+    <div class="ov-card"><div class="ov-ph">Ottobre · 6–9 sett.</div><div class="mob mass">MASSA</div><div class="ov-nm">M4 — Hatfield A</div><div class="ov-mt">Forza Base · Piramidale CAT · 3×/sett</div></div>
+    <div class="ov-card"><div class="ov-ph">Novembre · 8–10 sett.</div><div class="mob mass">MASSA</div><div class="ov-nm">M5 — Hatfield B</div><div class="ov-mt">Forza Massimale · 1 fondamentale/seduta</div></div>
+    <div class="ov-card"><div class="ov-ph">Dicembre · 6–8 sett.</div><div class="mob mass">MASSA</div><div class="ov-nm">M6 — Hatfield C</div><div class="ov-mt">Forza Resistente · RI progressivamente ridotto</div></div>
+    <div class="ov-card"><div class="ov-ph">Gennaio · 8–10 sett.</div><div class="mob mass">MASSA</div><div class="ov-nm">M7 — Hatfield D</div><div class="ov-mt">Massa Muscolare · CAT + Isotensivo</div></div>
+    <div class="ov-card"><div class="ov-ph">Feb–Mar · 8–10 sett.</div><div class="mob mass">MASSA</div><div class="ov-nm">M8–M9 — Avanzato</div><div class="ov-mt">Ultra Anabolico + Massa-Potenza 1</div></div>
+  </div>
+</div>
+
+<div id="tab-def" class="panel content">
+  <div class="stitle">FASE 1</div>
+  <div class="ssub">Definizione · Maggio → Agosto</div>
+  <div class="aline"></div>
+  <div class="meso-nav" id="mnDef">
+    <button class="mbtn active" onclick="selMDef('m1',this)">M1 — Riattivazione</button>
+    <button class="mbtn" onclick="selMDef('m2',this)">M2 — Shawn Ray</button>
+    <button class="mbtn" onclick="selMDef('m3',this)">M3 — Bulk</button>
+    <button class="mbtn" onclick="selMDef('t1',this)">T1 — Transizione</button>
+  </div>
+  <div class="wk-nav" id="wnDef"></div>
+  <div id="defCont"></div>
+</div>
+
+<div id="tab-mass" class="panel content">
+  <div class="stitle">FASE 2</div>
+  <div class="ssub">Costruzione Massa · Ottobre → Marzo</div>
+  <div class="aline"></div>
+  <div class="meso-nav" id="mnMass">
+    <button class="mbtn active" onclick="selMMass('m4',this)">M4 — Hatfield A</button>
+    <button class="mbtn" onclick="selMMass('m5',this)">M5 — Hatfield B</button>
+    <button class="mbtn" onclick="selMMass('m6',this)">M6 — Hatfield C</button>
+    <button class="mbtn" onclick="selMMass('m7',this)">M7 — Hatfield D</button>
+    <button class="mbtn" onclick="selMMass('m8',this)">M8 — Ultra Anab.</button>
+    <button class="mbtn" onclick="selMMass('m9',this)">M9 — Massa-Pot.</button>
+  </div>
+  <div class="wk-nav" id="wnMass"></div>
+  <div id="massCont"></div>
+</div>
+
+<div id="tab-guide" class="panel content">
+  <div class="stitle">GUIDA RPE</div>
+  <div class="ssub">Scala di intensità — Metodo They</div>
+  <div class="aline"></div>
+  <div class="tip"><strong>INTENSITÀ SECONDO THEY:</strong> Non è quanto pesa il bilanciere — è il numero di unità motorie coinvolte. L'RPE è lo strumento per misurarla in modo pratico.</div>
+  <div class="rpe-grid">
+    <div class="rpe-item"><div class="rpe-n" style="color:#4ade80">5</div><div class="rpe-d">Molto facile. Recupero. 5+ rep in riserva.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#86efac">6</div><div class="rpe-d">Facile. 4 rep in riserva. Riattivazione.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#a3e635">7</div><div class="rpe-d">Moderato. 2–3 rep in riserva.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#fbbf24">7.5</div><div class="rpe-d">Quasi buono. 2 rep, ultima dura.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#fb923c">8</div><div class="rpe-d">Buono. 1–2 rep con sforzo. Ipertrofia.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#f87171">8.5</div><div class="rpe-d">Duro. Forse 1 rep in più.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#ef4444">9</div><div class="rpe-d">Molto duro. 1 rep con massimo sforzo.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#b91c1c">10</div><div class="rpe-d">Massimale assoluto.</div></div>
+  </div>
+  <div class="nb" style="margin-top:16px">
+    <strong>PROGRESSIONE AUTOMATICA:</strong><br><br>
+    <em>RPE ≤ 6</em> → <strong style="color:#4ade80">+5% la prossima settimana</strong><br>
+    <em>RPE 7–7.5</em> → <strong style="color:#86efac">+2.5% la prossima settimana</strong><br>
+    <em>RPE 8–8.5</em> → <strong style="color:#fbbf24">Mantieni stesso peso</strong><br>
+    <em>RPE 9+</em> → <strong style="color:#f87171">–5% la prossima settimana</strong><br>
+    <em>✗ FAIL</em> → <strong style="color:#ef4444">–5% la prossima settimana</strong><br><br>
+    <strong>CAT:</strong> Concentrica esplosiva, eccentrica frenata 3–4". Intenzione, non slancio.<br>
+    <strong>ISOTENSIVO:</strong> 3"+3" costante. Zero punti morti. Tensione continua.<br>
+    <strong>PEAK CONTRACTION:</strong> Stop 2–3" al massimo avvicinamento muscolare.<br><br>
+    <strong>DELOAD:</strong> Ogni 4 settimane → 1 settimana al 60%. Ogni 6 settimane ad alta intensità → 1 settimana di riposo completo.
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="bnt active" id="bn-ov" onclick="switchTab('ov',this)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Overview
+  </button>
+  <button class="bnt" id="bn-def" onclick="switchTab('def',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+    Fase 1
+  </button>
+  <button class="bnt" id="bn-mass" onclick="switchTab('mass',this)">
+    <svg viewBox="0 0 24 24"><path d="M6 4h12M6 20h12M6 12h12M3 8l3-4M3 16l3 4M21 8l-3-4M21 16l-3 4"/></svg>
+    Fase 2
+  </button>
+  <button class="bnt" id="bn-guide" onclick="switchTab('guide',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+    Guida
+  </button>
+</nav>
+
+<script>
+// ============================================================
+// DATI MESOCICLI
+// ============================================================
+const M={
+  m1:{name:'M1 — Riattivazione',badge:'M1 · RIENTRO',weeks:4,dl:[],rpe:'5–7',note:'Slow-Motion Full Body · 3×/sett · R.I. 90" · Tecnica sopra tutto.',days:[{lbl:'LUN / MER / VEN — Full Body Slow-Motion',foc:'Full Body — Slow-Motion',ex:[
+    {n:'Squat libero (o Smith)',s:3,r:'12',rpe:'6',tech:'<strong>SLOW-MOTION 3+4":</strong> 3" scendi, 1" fermo in basso, 4" risali. Piedi larghezza spalle. Schiena neutra, petto alto. Il carico è secondario — il controllo è tutto.'},
+    {n:'Panca orizzontale bilanciere',s:3,r:'10',rpe:'6',tech:'<strong>SLOW-MOTION 3+4":</strong> 3" abbassa fino a sfiorare il petto, 1" stop, 4" spingi. Gomiti a 45–70°. Non rimbalzare sul petto.'},
+    {n:'Lat machine presa larga',s:3,r:'12',rpe:'6',tech:'<strong>SLOW-MOTION 3+4":</strong> 3" tira verso il petto, 1" contrai i dorsali, 4" risali. Petto aperto in alto.'},
+    {n:'Lento avanti bilanciere (o manubri)',s:3,r:'10',rpe:'6',tech:'<strong>SLOW-MOTION 3+4":</strong> Seduto, schiena verticale. 3" spingi, 4" abbassa. Non bloccare le gomita in cima.'},
+    {n:'Curl bilanciere',s:2,r:'12',rpe:'6',tech:'<strong>PEAK CONTRACTION:</strong> Porta su lentamente, tieni 2" in cima, 4" abbassa. Gomiti fermi ai fianchi.'},
+    {n:'French press EZ-bar',s:2,r:'12',rpe:'6',tech:'<strong>SLOW-MOTION 3+4":</strong> Sdraiato, gomiti fissi puntati al soffitto. 3" abbassa, 4" spingi. I gomiti non si aprono.'},
+    {n:'Calf in piedi',s:3,r:'15',rpe:'6',noW:true,tech:'<strong>ISOTENSIVO:</strong> Sali 3", tieni 1", scendi 3". Range completo — tallone ben abbassato.'},
+    {n:'Crunches addominali',s:3,r:'20',rpe:'—',noW:true,tech:'Arrotola vertebra per vertebra. Contrai in cima, torna lento. Nessun peso.'},
+  ]}]},
+  m2:{name:'M2 — Shawn Ray',badge:'M2 · DEFINIZIONE',weeks:8,dl:[4,8],rpe:'7–8',note:'Split 4×/sett · Lun+Mer = Gambe/Dorso/Bicipiti · Mar+Sab = Petto/Spalle/Tricipiti · R.I. 90"–2\'.',days:[
+    {lbl:'LUN + MER — Gambe / Dorso / Bicipiti',foc:'Gambe · Dorsale · Bicipiti',ex:[
+      {n:'Calf in piedi',s:4,r:'15',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO:</strong> Range completo. Sali lento, tieni 1". Contrazione, non carico.'},
+      {n:'Leg extension (riscaldamento)',s:3,r:'6/8',rpe:'6',tech:'<strong>RISCALDAMENTO:</strong> Carico moderato. Peak contraction 1" in cima. Prepara il ginocchio per lo squat.'},
+      {n:'Squat libero',s:5,r:'6/8',rpe:'8',tech:'<strong>CAT:</strong> Concentrica esplosiva, eccentrica frenata 3". Cosce parallele. Stop 1" in cima contraendo quad e glutei.'},
+      {n:'Mezzi stacchi bilanciere',s:3,r:'6/8',rpe:'7.5',tech:'<strong>CAT:</strong> Dalle ginocchia. Schiena neutra. Bilanciere sul corpo — non aprire le braccia.'},
+      {n:'Rematore bilanciere',s:4,r:'6/8',rpe:'7.5',tech:'<strong>CAT:</strong> Busto 45°, verso l\'ombelico. Estendi completamente in basso tra le rep.'},
+      {n:'Curl bilanciere',s:3,r:'6/8',rpe:'7.5',tech:'<strong>CAT + PEAK:</strong> Concentrica esplosiva, tieni 2" in cima, discesa 4". Gomiti fissi.'},
+    ]},
+    {lbl:'MAR + SAB — Petto / Spalle / Tricipiti',foc:'Petto · Deltoidi · Tricipiti',ex:[
+      {n:'Crunches con peso',s:3,r:'12',rpe:'7',noW:true,tech:'Disco leggero al petto. Arrotola lentamente. Contrazione piena in cima.'},
+      {n:'Panca orizzontale bilanciere',s:5,r:'6/8',rpe:'8',tech:'<strong>CAT:</strong> Abbassa controllato 2–3", spingi esplosivo. Stop 1" in cima. 3 punti di contatto.'},
+      {n:'Croci panca alta 30° manubri',s:3,r:'6/8',rpe:'7',tech:'<strong>ISOTENSIVO:</strong> Gomiti flessi, stretch in basso, risali lento. Non schioccare le braccia in cima.'},
+      {n:'Alzate laterali 2 manubri',s:3,r:'6/8',rpe:'7',tech:'<strong>CONTROLLO:</strong> Fino all\'altezza delle spalle. Mignolo in alto. Abbassa 3".'},
+      {n:'Lento dietro seduto',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT:</strong> Non abbassare oltre le orecchie. Se c\'è dolore alla spalla: lento avanti.'},
+      {n:'French press / Estensioni tricipiti',s:4,r:'6/8',rpe:'7.5',tech:'<strong>SLOW ECCENTRICA:</strong> Abbassa in 4", spingi esplosivo. Gomiti paralleli — non aprirli.'},
+    ]}
+  ]},
+  m3:{name:'M3 — Bulk',badge:'M3 · DEFINIZIONE',weeks:8,dl:[4,8],rpe:'7–8',note:'Full Body 3×/sett · R.I. 60"–90" · 1ª e ultima serie ISOTENSIVA, serie centrali CAT.',days:[{lbl:'LUN / MER / VEN — Scheda Unica',foc:'Full Body — CAT + Isotensivo',ex:[
+    {n:'Panca orizzontale bilanciere',s:6,r:'1×10 · 3×3 · 2×10',rpe:'7.5',tech:'<strong>1ª e ultime 2: ISOTENSIVO</strong> (3"+3"). <strong>Centrali ×3: CAT.</strong> La doppia stimolazione di They.'},
+    {n:'Squat libero',s:6,r:'1×12 · 3×5 · 2×12',rpe:'7.5',tech:'<strong>1ª e ultime 2: ISOTENSIVO. Centrali: CAT.</strong> Prima serie al 60% — non saltarla.'},
+    {n:'Lento avanti (o Arnold press)',s:6,r:'1×10 · 3×4 · 2×10',rpe:'7',tech:'<strong>1ª e ultime 2: ISOTENSIVO. Centrali: CAT.</strong> Arnold: ruota le mani durante la spinta.'},
+    {n:'Rematore bilanciere',s:6,r:'1×12 · 3×5 · 2×10',rpe:'7.5',tech:'<strong>CAT su tutte le serie.</strong> Busto fisso 45°. Verso l\'ombelico.'},
+    {n:'Curl bilanciere',s:5,r:'1×12 · 3×6 · 1×12',rpe:'7',tech:'<strong>PEAK CONTRACTION.</strong> Peak 2". Prima e ultima più leggere.'},
+    {n:'French press EZ-bar',s:6,r:'1×12 · 3×6 · 2×12',rpe:'7',tech:'<strong>SLOW ECCENTRICA.</strong> Abbassa in 4", spingi in 2".'},
+    {n:'Calf in piedi',s:4,r:'20',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO.</strong> Sali 3", tieni 1", scendi 3". Range completo.'},
+    {n:'Crunches addominali',s:3,r:'20',rpe:'—',noW:true,tech:'Senza peso. Lentamente. Aggiungi disco quando 20 rep diventano facili.'},
+  ]}]},
+  t1:{name:'T1 — Transizione',badge:'T1 · RECUPERO',weeks:3,dl:[],rpe:'max 6',note:'Recupero attivo · 2–3×/sett · Carichi al 60% di M3 · Prepara per la fase massa.',days:[{lbl:'LUN / MER / VEN — Recupero Attivo',foc:'Full Body Leggero',ex:[
+    {n:'Squat libero',s:3,r:'12/15',rpe:'5',tech:'<strong>RECUPERO:</strong> 60% del carico M3. Focus sulla sensazione muscolare.'},
+    {n:'Panca manubri',s:3,r:'12/15',rpe:'5',tech:'<strong>PUMP:</strong> Manubri. Movimenti fluidi. Meno stress articolare.'},
+    {n:'Lat machine presa larga',s:3,r:'12/15',rpe:'5',tech:'<strong>ISOTENSIVO leggero.</strong> Range completo, stretch totale.'},
+    {n:'Lento avanti manubri',s:3,r:'12',rpe:'5',tech:'<strong>LEGGERO.</strong> Solo manutenzione neuromuscolare.'},
+    {n:'Curl manubri alternato',s:2,r:'12',rpe:'5',tech:'Alternato, supinazione completa. Carico minimo.'},
+    {n:'Estensioni tricipiti cavo',s:2,r:'12',rpe:'5',tech:'Push-down cavo o manubrio sopra la testa. Leggero.'},
+    {n:'Calf + Crunches',s:3,r:'15/20',rpe:'—',noW:true,tech:'Isotensivo + corpo libero. Mantenimento senza stress.'},
+  ]}]},
+  m4:{name:'M4 — Hatfield A · Forza Base',badge:'M4 · HATFIELD A',weeks:8,dl:[4,8],rpe:'7–8',note:'Forza base · 3×/sett · R.I. 2–3\' · Piramidale progressivo. CAT su tutti i fondamentali.',days:[{lbl:'GIORNO A — Fondamentali',foc:'Squat · Panca · Dorsale · Complementari',ex:[
+    {n:'Squat libero',s:5,r:'12→6 (piramidale)',rpe:'7.5',tech:'<strong>PIRAMIDALE CAT:</strong> 1×12, 1×10, 1×8, 1×6, 1×6 max. Eccentrica 3", concentrica esplosiva.'},
+    {n:'Panca orizzontale bilanciere',s:5,r:'12→6 (piramidale)',rpe:'7.5',tech:'<strong>PIRAMIDALE CAT:</strong> Stesso schema squat. Incrementa ogni settimana — tieni il diario.'},
+    {n:'Lat machine o Trazioni',s:4,r:'12→6 (piramidale)',rpe:'7.5',tech:'<strong>CAT:</strong> Verso il petto. Scapole giù e indietro. Trazioni preferibili alla lat machine.'},
+    {n:'Lento avanti / Arnold press',s:3,r:'8/10',rpe:'7',tech:'<strong>CAT:</strong> Complementare spalle. Alterna ogni allenamento.'},
+    {n:'Curl bilanciere',s:3,r:'8/10',rpe:'7',tech:'<strong>PEAK CONTRACTION:</strong> Gomiti fissi. Prima la tecnica, poi il carico.'},
+    {n:'Calf in piedi',s:4,r:'15',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO:</strong> Range completo. Alterna unilaterale e bilaterale.'},
+    {n:'Crunches con peso',s:3,r:'20/25',rpe:'—',noW:true,tech:'Core forte = fondamentali più sicuri. Progressione lenta del peso.'},
+  ]}]},
+  m5:{name:'M5 — Hatfield B · Forza Massimale',badge:'M5 · HATFIELD B',weeks:8,dl:[4,8],rpe:'8–8.5',note:'Forza massimale · 3–4×/sett · R.I. 3–5\' fondamentali · 1 fondamentale/seduta + complementari.',days:[
+    {lbl:'GIORNO 1 — Squat + Stacchi',foc:'Squat (principale) · Stacchi · Femorali',ex:[
+      {n:'Squat libero (principale)',s:6,r:'12→massimale',rpe:'8.5',tech:'<strong>PIRAMIDALE PIENO CAT:</strong> 1×12(60%), 1×8(75%), 1×6(85%), 1×4(90%), 1×4(95%), 1×MAX. R.I. 3–5\'.'},
+      {n:'Stacchi da terra bilanciere',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT:</strong> Schiena neutra. Trascina il bilanciere sul corpo. NON arrotondare la schiena lombare.'},
+      {n:'Leg curl sdraiato',s:3,r:'8/10',rpe:'7',tech:'<strong>ISOTENSIVO:</strong> Flessione completa, estensione controllata 3". Punta verso di te.'},
+      {n:'Calf in piedi',s:4,r:'15/20',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO:</strong> Varia angolazione piedi ogni seduta.'},
+      {n:'Crunches con peso',s:3,r:'15/20',rpe:'7',noW:true,tech:'Progressione lenta. Core forte = stacchi sicuri.'},
+    ]},
+    {lbl:'GIORNO 2 — Panca + Dorsale',foc:'Panca (principale) · Rematore · Braccia',ex:[
+      {n:'Panca orizzontale bilanciere (principale)',s:6,r:'12→massimale',rpe:'8.5',tech:'<strong>PIRAMIDALE PIENO CAT:</strong> Stesso schema squat. R.I. 3–5\'.'},
+      {n:'Rematore bilanciere',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT:</strong> Verso l\'ombelico. Schiena forte = panca forte. R.I. 2\'30".'},
+      {n:'Lat machine avanti',s:3,r:'8/10',rpe:'7',tech:'<strong>ISOTENSIVO:</strong> Range completo. Stretch totale in alto.'},
+      {n:'Curl bilanciere presa stretta',s:4,r:'6/8',rpe:'7.5',tech:'<strong>CAT + PEAK:</strong> Presa 15–20 cm. Brachiale coinvolto. Peak 2".'},
+      {n:'Parallele con peso (o French press)',s:4,r:'6/8',rpe:'7.5',tech:'<strong>CAT:</strong> Parallele con peso se fai 8+ rep a corpo libero.'},
+    ]},
+    {lbl:'GIORNO 3 — Spalle + Complementari',foc:'Deltoidi · Trapezi · Accessori',ex:[
+      {n:'Lento avanti o Arnold press',s:5,r:'6/10 (piramidale)',rpe:'8',tech:'<strong>PIRAMIDALE CAT:</strong> Fondamentale spalle. Alterna ogni settimana.'},
+      {n:'Tirate al mento EZ-bar',s:4,r:'6/8',rpe:'7.5',tech:'<strong>CAT:</strong> Gomiti in alto e fuori. Barra almeno all\'altezza del collo.'},
+      {n:'Alzate laterali manubri',s:4,r:'10/12',rpe:'7',tech:'<strong>SLOW 3+3":</strong> Volume e controllo costruiscono il deltoide medio.'},
+      {n:'Shrugs bilanciere',s:3,r:'8/10',rpe:'7.5',tech:'<strong>ISOTENSIVO:</strong> Movimento verticale puro. Tieni 2" in cima.'},
+      {n:'Calf + Addominali',s:3,r:'15/20',rpe:'6',noW:true,tech:'Mantenimento. Calf isotensivo + crunches con peso.'},
+    ]}
+  ]},
+  m6:{name:'M6 — Hatfield C · Forza Resistente',badge:'M6 · HATFIELD C',weeks:8,dl:[4,8],rpe:'8–8.5',note:'Forza resistente · 3–4×/sett · R.I. da 2\' a 60" (ridotto ogni settimana) · Stessi carichi M5.',days:[
+    {lbl:'SCHEMA A — Parte Superiore',foc:'Petto · Dorso · Spalle · Braccia',ex:[
+      {n:'Panca orizzontale bilanciere',s:5,r:'4/10',rpe:'8',tech:'<strong>CAT · RI RIDOTTO:</strong> S1: 2\' → S2: 90" → S3: 75" → S4: 60". Peso invariato — la progressione è nel recupero.'},
+      {n:'Rematore bilanciere',s:4,r:'4/10',rpe:'8',tech:'<strong>CAT · RI RIDOTTO:</strong> Se cali la forma, fermati. Qualità > quantità.'},
+      {n:'Lento avanti / Arnold press',s:4,r:'4/10',rpe:'7.5',tech:'<strong>CAT · RI RIDOTTO:</strong> Carico da M5. Riduci R.I. ogni settimana.'},
+      {n:'Curl bilanciere',s:4,r:'4/10',rpe:'7.5',tech:'<strong>PEAK · RI RIDOTTO:</strong> Il bruciore muscolare è normale e positivo.'},
+      {n:'Parallele con peso (o French press)',s:4,r:'4/10',rpe:'7.5',tech:'<strong>CAT · RI RIDOTTO:</strong> Il tricipite sotto acidosi si densifica.'},
+    ]},
+    {lbl:'SCHEMA B — Parte Inferiore',foc:'Quadricipiti · Femorali · Polpacci',ex:[
+      {n:'Squat libero',s:5,r:'4/10',rpe:'8.5',tech:'<strong>CAT · RI RIDOTTO:</strong> Brutale sotto acidosi — mantieni la forma. Fermati se la schiena si arrotonda.'},
+      {n:'Stacchi gambe tese (Romanian DL)',s:4,r:'4/10',rpe:'8',tech:'<strong>CAT:</strong> Gambe quasi tese, schiena neutra. Stretch ai femorali. Carico da M5.'},
+      {n:'Leg curl sdraiato',s:3,r:'8/12',rpe:'7.5',tech:'<strong>ISOTENSIVO:</strong> Flessione completa, estensione controllata 3".'},
+      {n:'Calf in piedi',s:5,r:'15/20',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO:</strong> 5 serie. Range completo. Volume = variabile chiave per i polpacci.'},
+      {n:'Crunches con peso',s:3,r:'20/25',rpe:'7',noW:true,tech:'Core forte per sopportare i carichi delle fasi successive.'},
+    ]}
+  ]},
+  m7:{name:'M7 — Hatfield D · Massa',badge:'M7 · HATFIELD D',weeks:10,dl:[5,10],rpe:'7.5–8',note:'Costruzione principale · Split 3 giorni · R.I. 90"–2\' · 1 fondamentale CAT (6–8 rep) + complementari isotensivi (10–15 rep).',days:[
+    {lbl:'GIORNO 1 — Petto',foc:'Pettorali completi',ex:[
+      {n:'Panca orizzontale bilanciere',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT — FONDAMENTALE:</strong> R.I. 90"–2\'. Eccentrica 3", concentrica esplosiva. Dai tutto qui.'},
+      {n:'Croci panca alta 30° manubri',s:3,r:'12/15',rpe:'7',tech:'<strong>SLOW ISOTENSIVO:</strong> R.I. 60"–90". 3"+3". Stretch profondo, contrazione in cima.'},
+      {n:'Panca declinata manubri',s:3,r:'12/15',rpe:'7',tech:'<strong>SLOW ISOTENSIVO:</strong> Petto basso. 3"+3". Fondamentale per il volume del pettore.'},
+    ]},
+    {lbl:'GIORNO 2 — Dorso / Spalle',foc:'Dorsale · Trapezi · Deltoidi',ex:[
+      {n:'Rematore bilanciere',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT — FONDAMENTALE:</strong> R.I. 2\'. Verso l\'ombelico. Senza rematore pesante non c\'è dorso.'},
+      {n:'Lat machine avanti (o Trazioni)',s:3,r:'12/15',rpe:'7',tech:'<strong>SLOW ISOTENSIVO:</strong> R.I. 60"–90". 3"+3". Ampiezza dorsale.'},
+      {n:'Lento dietro (o Arnold press)',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT — FONDAMENTALE SPALLE:</strong> R.I. 90". Se dolore: Arnold press.'},
+      {n:'Alzate laterali manubri',s:3,r:'12/15',rpe:'7',tech:'<strong>SLOW ISOTENSIVO:</strong> 3"+3". Volume e controllo per il deltoide medio.'},
+    ]},
+    {lbl:'GIORNO 3 — Gambe / Braccia',foc:'Gambe · Bicipiti · Tricipiti · Polpacci',ex:[
+      {n:'Squat libero',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT — FONDAMENTALE:</strong> R.I. 2\'. Sotto la parallela. Glutei e femorali attivati in profondità.'},
+      {n:'Leg press piedi larghi e alti',s:3,r:'12/15',rpe:'7',tech:'<strong>SLOW ISOTENSIVO:</strong> R.I. 90". Piedi larghi e alti — attiva femorali. 3"+3".'},
+      {n:'Curl bilanciere',s:3,r:'6/8',rpe:'7.5',tech:'<strong>CAT + PEAK:</strong> R.I. 90". Concentrica esplosiva, peak 2", eccentrica 3".'},
+      {n:'Curl alternato manubri',s:2,r:'10/12',rpe:'7',tech:'<strong>PEAK:</strong> Supinazione completa in cima. Mignolo verso l\'alto.'},
+      {n:'French press EZ-bar',s:3,r:'10/12',rpe:'7.5',tech:'<strong>SLOW ECCENTRICA:</strong> Abbassa in 4", spingi esplosivo. Gomiti fissi.'},
+      {n:'Calf machine in piedi',s:4,r:'15/20',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO:</strong> Sali 3", tieni 1", scendi 3". Range completo.'},
+    ]}
+  ]},
+  m8:{name:'M8 — Ultra Anabolico',badge:'M8 · AVANZATO',weeks:10,dl:[5,10],rpe:'8–8.5',note:'Routine Olympian\'s News · Schema A/B/C · R.I. 2–3\' · Stimola GH e testosterone endogeni.',days:[
+    {lbl:'SEDUTA A — Dorsale / Femorali / Tricipiti',foc:'Stacchi · Dorsale · Tricipiti',ex:[
+      {n:'Stacchi da terra completi',s:4,r:'6/10',rpe:'8',tech:'<strong>CAT:</strong> Dal pavimento. Schiena neutra. Barra vicina al corpo. Tra i movimenti più anabolici.'},
+      {n:'Trazioni sbarra (larga↔stretta)',s:2,r:'6/10',rpe:'8',tech:'<strong>CONTROLLO:</strong> Alterna presa. Stretch totale in basso, contrazione piena in cima.'},
+      {n:'Rematore 1 manubrio',s:2,r:'6/10',rpe:'7.5',tech:'<strong>PEAK:</strong> Ginocchio sulla panca. Verso l\'anca. Ruota il busto per più range.'},
+      {n:'Pressa 45° piedi alti (femorali)',s:3,r:'6/10',rpe:'8',tech:'<strong>FULL ROM:</strong> Piedi alti e larghi. Femorali e glutei massiccamente attivati.'},
+      {n:'French press EZ-bar orizzontale',s:3,r:'6/10',rpe:'7.5',tech:'<strong>SLOW ECCENTRICA:</strong> Abbassa in 4", spingi in 2". Stretch del tricipite lungo.'},
+      {n:'Push-down cavo presa stretta',s:3,r:'6/10',rpe:'7.5',tech:'<strong>PEAK:</strong> Estendi completamente. Tieni 2" in basso. Capo laterale.'},
+    ]},
+    {lbl:'SEDUTA B — Petto / Spalle / Bicipiti',foc:'Petto · Deltoidi · Bicipiti',ex:[
+      {n:'Panca orizzontale bilanciere',s:3,r:'6/10',rpe:'8',tech:'<strong>CAT:</strong> Eccentrica 3", concentrica esplosiva. R.I. 2\'.'},
+      {n:'Croci panca alta 30° manubri',s:3,r:'6/10',rpe:'7.5',tech:'<strong>ISOTENSIVO:</strong> Stretch profondo. 3"+3". Petto alto e mediale.'},
+      {n:'Arnold press manubri seduto',s:3,r:'6/10',rpe:'8',tech:'<strong>CAT:</strong> Palmi verso di te → ruota durante la spinta. Tutte e 3 le porzioni del deltoide.'},
+      {n:'Alzate laterali 2 manubri',s:3,r:'6/10',rpe:'7',tech:'<strong>CONTROLLO:</strong> Fino alle spalle. Abbassa 3". L\'eccentrica costruisce il deltoide.'},
+      {n:'Curl bilanciere presa stretta',s:3,r:'6/10',rpe:'7.5',tech:'<strong>CAT + PEAK:</strong> Presa 15–20 cm. Concentrica esplosiva, peak 2", eccentrica 3".'},
+      {n:'Curl concentrazione 1 manubrio',s:2,r:'6/10',rpe:'7',tech:'<strong>IPERSUPINAZIONE:</strong> Gomito al ginocchio. Ruota il mignolo fuori in cima.'},
+    ]},
+    {lbl:'SEDUTA C — Gambe complete',foc:'Quad · Femorali · Polpacci · Addome',ex:[
+      {n:'Squat normale',s:3,r:'6/10 (piramidale)',rpe:'8',tech:'<strong>CAT:</strong> 1×10, 1×8, 1×6. Il Re. Eccentrica 3", concentrica esplosiva.'},
+      {n:'Hack squat o Sissy squat Smith',s:3,r:'6/10',rpe:'7.5',tech:'<strong>SLOW:</strong> Isola il vasto laterale. Hack: bilanciere dietro i talloni.'},
+      {n:'Leg extension parziale (terzo finale)',s:3,r:'6/10',rpe:'7',tech:'<strong>CONTROLLO:</strong> Solo il terzo finale. Vasto mediale (goccio sopra il ginocchio).'},
+      {n:'Donkey calf (o calf 1 gamba)',s:3,r:'15/20',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO:</strong> Massimo range. Gastrocnemio in stiramento profondo.'},
+      {n:'Calf seduto (soleo)',s:3,r:'20/25',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO:</strong> Ginocchio flesso — soleo separato dal gastrocnemio.'},
+      {n:'Crunches cavo + Leg raises',s:4,r:'15/max',rpe:'7',noW:true,tech:'Circuito: 15 crunches cavo → 15" riposo → max leg raises.'},
+    ]}
+  ]},
+  m9:{name:'M9 — Massa-Potenza 1',badge:'M9 · PICCO',weeks:8,dl:[4,8],rpe:'8.5–9',note:'Picco del ciclo · 3×/sett · R.I. 2–3\' fondamentali, 60"–90" complementari · Arriva qui con le fondamenta costruite.',days:[
+    {lbl:'GIORNO 1 — Gambe',foc:'Quadricipiti · Femorali · Polpacci',ex:[
+      {n:'Leg extension riscaldamento',s:2,r:'25',rpe:'5',tech:'<strong>RISCALDAMENTO:</strong> Carico minimo, range completo. Non saltarlo.'},
+      {n:'Squat libero (principale)',s:6,r:'10→massimale',rpe:'9',tech:'<strong>CAT PIRAMIDALE PIENO:</strong> 1×10(60%), 1×6(80%), 1×4(90%), 1×4(95%), 1×4(97%), 1×MAX. R.I. 3–5\'. They: "a meno 2 rep dalla fine si sentono parolacce."'},
+      {n:'Pressa 45° piedi larghi e alti',s:4,r:'10→4 (piramidale)',rpe:'8',tech:'<strong>PIRAMIDALE CAT:</strong> Complementare pesante. Piedi larghi. R.I. 2\'.'},
+      {n:'Leg extension parziale basso',s:3,r:'12',rpe:'7',tech:'<strong>CONTROLLO:</strong> Terzo finale. Vasto mediale. R.I. 60".'},
+      {n:'Leg curl sdraiato',s:4,r:'15→8 (piramidale)',rpe:'7.5',tech:'<strong>SLOW:</strong> Flessione completa + estensione 3". Pre-affaticati da squat.'},
+      {n:'½ Stacchi gambe tese',s:2,r:'12/15',rpe:'6',tech:'<strong>CONTROLLO:</strong> Ginocchia→fianchi. Carico leggero. Volume residuo femorali.'},
+      {n:'Calf raises pesanti',s:3,r:'6/8',rpe:'8',tech:'<strong>ESPLOSIVO:</strong> Carico elevato, 6 rep. Concentrica esplosiva, eccentrica 3".'},
+    ]},
+    {lbl:'GIORNO 2 — Petto / Braccia',foc:'Petto · Bicipiti · Tricipiti',ex:[
+      {n:'Panca orizzontale Smith (piramidale pieno)',s:6,r:'15→massimale',rpe:'9',tech:'<strong>PIRAMIDALE PIENO CAT:</strong> 1×15(50%), 1×12(65%), 1×10(75%), 1×6(85%), 1×2(95%), 1×MAX. R.I. 3–5\'. Il picco dell\'intero ciclo.'},
+      {n:'Panca inclinata 30° manubri',s:3,r:'10/12',rpe:'7.5',tech:'<strong>ISOTENSIVO:</strong> Petto alto. R.I. 90". 3"+3".'},
+      {n:'Panca declinata croci manubri',s:3,r:'10/12',rpe:'7',tech:'<strong>ISOTENSIVO:</strong> Petto basso. Stretch profondo. R.I. 90".'},
+      {n:'Curl bilanciere presa stretta',s:4,r:'8/10',rpe:'7.5',tech:'<strong>CAT + PEAK:</strong> Concentrica esplosiva, peak 2", eccentrica 4". R.I. 90".'},
+      {n:'French press EZ-bar orizzontale',s:4,r:'8/10',rpe:'7.5',tech:'<strong>SLOW ECCENTRICA:</strong> Abbassa in 4", spingi in 2". R.I. 90".'},
+    ]},
+    {lbl:'GIORNO 3 — Dorso / Spalle',foc:'Dorsale · Trapezi · Deltoidi',ex:[
+      {n:'½ Stacchi da rack + Massimali singoli',s:9,r:'6/8 + 5×1',rpe:'9',tech:'<strong>MASSIMALI SINGOLI:</strong> 4×6/8 fino al 90–95%, poi 5 singoli massimali. R.I. 4–5\'. Recluta UM latenti che non si attivano altrimenti.'},
+      {n:'Lat machine presa larga',s:3,r:'10/15',rpe:'7',tech:'<strong>CONTROLLO:</strong> R.I. 90". Carichi moderati dopo i massimali. Range completo.'},
+      {n:'Pull-down carrucola alta presa larga',s:3,r:'10/15',rpe:'7',tech:'<strong>ISOTENSIVO:</strong> R.I. 90". Dorsale superiore. 3"+3".'},
+      {n:'Lento dietro Smith (piramidale)',s:5,r:'15→6',rpe:'8.5',tech:'<strong>PIRAMIDALE CAT:</strong> 1×15, 1×12, 1×10, 1×8, 1×6. R.I. 2\'.'},
+      {n:'Alzate laterali 1 braccio appoggiato',s:3,r:'10/12',rpe:'7',tech:'<strong>CONTROLLO:</strong> Più range, meno compensazioni. Abbassa 3".'},
+      {n:'Alzate posteriori 2 manubri busto 90°',s:3,r:'10/12',rpe:'7',tech:'<strong>ISOTENSIVO:</strong> Deltoide posteriore + romboidi. Forma completa delle spalle.'},
+    ]}
+  ]}
+};
+
+// ============================================================
+// STORAGE — localStorage
+// ============================================================
+const FB = (()=>{ try{return JSON.parse(localStorage.getItem('il10_fb')||'{}')}catch(e){return{}} })();
+function save(){ try{localStorage.setItem('il10_fb',JSON.stringify(FB))}catch(e){} }
+function fbk(m,w,d,e,s){ return `${m}_w${w}_d${d}_e${e}_s${s}`; }
+
+// ============================================================
+// EXPORT / IMPORT
+// ============================================================
+function exportData(){
+  const data = { version:'il10', date: new Date().toISOString(), fb: FB };
+  const b = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = `ironlab-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+function importData(e){
+  const file = e.target.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if(d.fb){ Object.assign(FB, d.fb); save(); alert('Dati importati. Ricarica la pagina.'); location.reload(); }
+    } catch(err){ alert('File non valido.'); }
+  };
+  r.readAsText(file);
+}
+
+// ============================================================
+// PROGRESSIONE
+// ============================================================
+function rnd(kg){ return Math.round(kg*2)/2; }
+function calcNext(meso,week,di,ei){
+  const md=M[meso]; if(!md) return null;
+  const ex=md.days[di]?.ex[ei]; if(!ex) return null;
+  let kg=[],fails=0,rpes=[],hd=false;
+  for(let s=0;s<ex.s;s++){
+    const st=FB[fbk(meso,week,di,ei,s)]||{};
+    if(st.kg!=null){kg.push(st.kg);hd=true;}
+    if(st.completed===false){fails++;hd=true;}
+    if(st.completed!==undefined)hd=true;
+    if(st.rpe){rpes.push(parseFloat(st.rpe));hd=true;}
+  }
+  if(!hd) return null;
+  const ref=kg.length?kg[kg.length-1]:null;
+  const avg=rpes.length?rpes.reduce((a,b)=>a+b,0)/rpes.length:null;
+  const nw=week+1; const ndl=md.dl.includes(nw);
+  if(ndl&&ref){const dk=rnd(ref*.6);return{kg:dk,type:'dl',lbl:`⬇ DELOAD → ${dk} kg`};}
+  if(fails>0){if(ref){const nk=rnd(ref*.95);return{kg:nk,type:'down',lbl:`✗ FAIL → ${nk} kg (−5%)`};}return{kg:null,type:'down',lbl:'✗ FAIL → −5%'};}
+  if(!avg&&!ref)return{kg:null,type:'warn',lbl:'Inserisci carico e RPE'};
+  if(!avg)return{kg:ref,type:'warn',lbl:`${ref} kg — inserisci RPE`};
+  if(avg<=6){const nk=ref?rnd(ref*1.05):null;return{kg:nk,type:'up',lbl:nk?`📈 RPE${avg.toFixed(1)} → ${nk}kg(+5%)`:`📈 +5%`};}
+  if(avg<=7.5){const nk=ref?rnd(ref*1.025):null;return{kg:nk,type:'up',lbl:nk?`📈 RPE${avg.toFixed(1)} → ${nk}kg(+2.5%)`:`📈 +2.5%`};}
+  if(avg<=8.5){return{kg:ref,type:'hold',lbl:`↔ RPE${avg.toFixed(1)} → ${ref?ref+'kg':'stesso'}` };}
+  const nk=ref?rnd(ref*.95):null;
+  return{kg:nk,type:'warn',lbl:nk?`⚠ RPE${avg.toFixed(1)} → ${nk}kg(−5%)`:`⚠ −5%`};
+}
+function swCls(t){return t==='up'?'':t==='hold'?' hold':t==='down'?' down':t==='dl'?' dl':' warn';}
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderEx(meso,week,di,ei,ex){
+  const md=M[meso]; const isDl=md.dl.includes(week);
+  const noW=ex.noW||ex.rpe==='—';
+  const rc=parseFloat(ex.rpe)>=9?'r9':parseFloat(ex.rpe)>=8?'r8':parseFloat(ex.rpe)>=7?'r7':'r6';
+
+  let sugg='';
+  if(!noW){
+    const sid=`sg-${meso}-w${week}-d${di}-e${ei}`;
+    if(week>1){
+      const p=calcNext(meso,week-1,di,ei);
+      sugg=`<div style="margin-bottom:7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <span style="font-size:8px;color:var(--mu);font-family:'Courier New',monospace;text-transform:uppercase;letter-spacing:.8px;">Sett.prec →</span>
+        <span id="${sid}" class="sw${p?swCls(p.type):''}">${p?p.lbl:'Completa la sett. precedente'}</span>
+      </div>`;
+    } else {
+      sugg=`<div style="margin-bottom:7px;"><span style="font-size:9px;color:var(--acc2);font-family:'Courier New',monospace;">⚡ SETT. 1 — Usa un carico tecnico di rodaggio</span></div>`;
+    }
+  }
+
+  let rows='';
+  for(let s=0;s<ex.s;s++){
+    const k=fbk(meso,week,di,ei,s); const st=FB[k]||{};
+    const hasKg=st.kg!=null;
+    let pre='';
+    if(!hasKg&&week>1&&!noW){const pv=calcNext(meso,week-1,di,ei);if(pv&&pv.kg!==null)pre=pv.kg;}
+    const disp=hasKg?st.kg:pre;
+    const ps=(!hasKg&&pre!=='')?'class="wi wi-pre"':'class="wi"';
+    const wc=noW
+      ?`<span style="font-family:'Courier New',monospace;font-size:9px;color:var(--mu)">—</span>`
+      :`<div style="display:flex;align-items:center;gap:3px;" id="wc-${k}">
+          <input ${ps} id="wi-${k}" type="number" min="0" step="0.5" placeholder="kg" value="${disp}"
+            ${hasKg?'disabled':''}
+            onblur="lkW(this)" onkeydown="if(event.key==='Enter')this.blur()"
+            data-meso="${meso}" data-week="${week}" data-di="${di}" data-ei="${ei}" data-si="${s}">
+          <button class="edit-btn" id="ed-${k}" onclick="ulW('${k}')" style="${hasKg?'':'display:none'}">✏</button>
+        </div>`;
+    const okC=st.completed===true?' ok':'';
+    const flC=st.completed===false?' fail':'';
+    const rbtns=['6','7','7.5','8','8.5','9'].map(r=>{
+      const rc2=st.rpe===r?' rs':'';
+      return `<button id="fr-${k}-${r}" class="fbb${rc2}" onclick="setFB('${meso}',${week},${di},${ei},${s},'rpe','${r}')">${r}</button>`;
+    }).join('');
+    rows+=`<tr>
+      <td><span style="font-family:'Courier New',monospace;font-size:10px;color:var(--mu)">${s+1}</span></td>
+      <td><span style="font-family:'Courier New',monospace;font-size:10px">${ex.r}</span></td>
+      <td><span class="rt ${rc}">${noW?'—':'RPE '+ex.rpe}</span></td>
+      <td>${wc}</td>
+      <td><div class="fbrow">
+        <button id="fo-${k}" class="fbb${okC}" onclick="setFB('${meso}',${week},${di},${ei},${s},'completed',true)">✓ SÌ</button>
+        <button id="ff-${k}" class="fbb${flC}" onclick="setFB('${meso}',${week},${di},${ei},${s},'completed',false)">✗ FAIL</button>
+      </div></td>
+      <td><div class="fbrow">${rbtns}</div></td>
+    </tr>`;
+  }
+
+  return `<div class="ex">
+    <div class="ex-n">${ei+1}. ${ex.n.toUpperCase()}</div>
+    <div class="ex-m">${ex.s} SERIE × ${ex.r} REP${noW?'':' · RPE '+ex.rpe}${isDl?' · ⚡ DELOAD — 60% CARICO':''}</div>
+    <div class="tech">${ex.tech}</div>
+    ${sugg}
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>S.</th><th>REP</th><th>RPE TARGET</th><th>KG</th><th>OK?</th><th>RPE REALE</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="adv" id="adv-${meso}-w${week}-d${di}-e${ei}" data-sets="${ex.s}"></div>
+  </div>`;
+}
+
+function renderWeek(meso,week){
+  const md=M[meso]; const isDl=md.dl.includes(week);
+  let h='';
+  if(isDl) h+=`<div class="tip"><strong>🔄 DELOAD:</strong> Tutti i carichi al 60%. Stesse serie e rep, RPE max 5–6. È dove avviene il vero adattamento.</div>`;
+  h+=`<div class="nb" style="margin-bottom:12px"><em>${md.name}</em> · RPE: <strong>${md.rpe}</strong><br>${md.note}</div>`;
+  md.days.forEach((day,di)=>{
+    const id=`dc-${meso}-w${week}-d${di}`;
+    h+=`<div class="dc" id="${id}">
+      <div class="dc-hdr" onclick="tD('${id}')">
+        <div><div class="dc-lbl">${day.lbl}</div><div class="dc-foc">${day.foc}</div></div>
+        <div class="dc-tog">▼</div>
+      </div>
+      <div class="dc-body">`;
+    day.ex.forEach((ex,ei)=>{ h+=renderEx(meso,week,di,ei,ex); });
+    h+=`<div class="prog"><strong>📋</strong> Riscaldamento 5–10 min mobilità + 2 serie a vuoto sui fondamentali.<br>Defaticamento 5 min stretching sui muscoli allenati.${isDl?'<br><strong>DELOAD: carico al 60%, non spingere.</strong>':''}</div>`;
+    h+=`</div></div>`;
+  });
+  return h;
+}
+
+// ============================================================
+// FEEDBACK HANDLERS
+// ============================================================
+function setFB(meso,week,di,ei,si,type,val){
+  const k=fbk(meso,week,di,ei,si);
+  if(!FB[k])FB[k]={};
+  FB[k][type]=val; save();
+  updUI(meso,week,di,ei,si);
+  updAdv(meso,week,di,ei);
+  updSg(meso,week,di,ei);
+}
+
+function updUI(meso,week,di,ei,si){
+  const k=fbk(meso,week,di,ei,si); const st=FB[k]||{};
+  const ob=document.getElementById(`fo-${k}`); const fb2=document.getElementById(`ff-${k}`);
+  if(ob)ob.className='fbb'+(st.completed===true?' ok':'');
+  if(fb2)fb2.className='fbb'+(st.completed===false?' fail':'');
+  for(const r of['6','7','7.5','8','8.5','9']){
+    const b=document.getElementById(`fr-${k}-${r}`);
+    if(b)b.className='fbb'+(st.rpe===r?' rs':'');
+  }
+  const inp=document.getElementById(`wi-${k}`);
+  if(inp&&st.kg!=null&&inp.value==='')inp.value=st.kg;
+}
+
+function updAdv(meso,week,di,ei){
+  const el=document.getElementById(`adv-${meso}-w${week}-d${di}-e${ei}`); if(!el)return;
+  const sets=parseInt(el.dataset.sets); let hd=false;
+  for(let s=0;s<sets;s++){const st=FB[fbk(meso,week,di,ei,s)]||{};if(st.kg!=null||st.completed!==undefined||st.rpe)hd=true;}
+  if(!hd){el.classList.remove('show');return;}
+  el.classList.add('show');
+  const r=calcNext(meso,week,di,ei);
+  if(!r){el.innerHTML='⚡ Inserisci carico e RPE.';return;}
+  const C={up:['rgba(74,222,128,.08)','rgba(74,222,128,.3)','#86efac'],hold:['rgba(251,146,60,.08)','rgba(251,146,60,.3)','#fdba74'],down:['rgba(248,113,113,.08)','rgba(248,113,113,.3)','#fca5a5'],dl:['rgba(139,92,246,.08)','rgba(139,92,246,.3)','#c4b5fd'],warn:['rgba(251,191,36,.08)','rgba(251,191,36,.3)','#fde68a']};
+  const c=C[r.type]||C.warn;
+  el.style.background=c[0];el.style.borderColor=c[1];el.style.color=c[2];
+  const nw=week+1; const ndl=M[meso]?.dl.includes(nw);
+  el.innerHTML=`<strong>SETT. ${nw}${ndl?' — ⚡ DELOAD':''}:</strong> ${r.lbl}`;
+}
+
+function updSg(meso,week,di,ei){
+  const el=document.getElementById(`sg-${meso}-w${week+1}-d${di}-e${ei}`); if(!el)return;
+  const r=calcNext(meso,week,di,ei);
+  if(r){el.className=`sw${swCls(r.type)}`;el.textContent=r.lbl;}
+}
+
+function lkW(inp){
+  const{meso,week,di,ei,si}=inp.dataset; const v=parseFloat(inp.value);
+  const k=fbk(meso,+week,+di,+ei,+si);
+  if(!isNaN(v)&&v>0){
+    if(!FB[k])FB[k]={};FB[k].kg=v;save();inp.disabled=true;
+    inp.className='wi';
+    const ed=document.getElementById(`ed-${k}`);if(ed)ed.style.display='';
+    updAdv(meso,+week,+di,+ei);updSg(meso,+week,+di,+ei);
+  }
+}
+function ulW(k){const i=document.getElementById(`wi-${k}`);const e=document.getElementById(`ed-${k}`);if(i){i.disabled=false;i.focus();i.select();}if(e)e.style.display='none';}
+function tD(id){document.getElementById(id).classList.toggle('open');}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+let cDef='m1',cMass='m4',cWkD=1,cWkM=1;
+
+function buildWkNav(navId,meso,cWk,cb){
+  const md=M[meso]; const nav=document.getElementById(navId);
+  nav.innerHTML=`<span class="wlbl">Sett.:</span>`;
+  for(let w=1;w<=md.weeks;w++){
+    const isDl=md.dl.includes(w);
+    const b=document.createElement('button');
+    b.className='wbtn'+(isDl?' dl':'')+(w===cWk?' active':'');
+    b.textContent=`${w}${isDl?'🔄':''}`;
+    b.onclick=()=>cb(w,b,navId);
+    nav.appendChild(b);
+  }
+}
+
+function selWk(w,btn,navId){
+  document.querySelectorAll(`#${navId} .wbtn`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const isDef=navId==='wnDef';
+  if(isDef){cWkD=w;document.getElementById('defCont').innerHTML=renderWeek(cDef,w);}
+  else{cWkM=w;document.getElementById('massCont').innerHTML=renderWeek(cMass,w);}
+  document.getElementById('wkBadge').textContent=`S.${w}`;
+}
+
+function selMDef(meso,btn){
+  document.querySelectorAll('#mnDef .mbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  cDef=meso;cWkD=1;
+  buildWkNav('wnDef',meso,1,selWk);
+  document.getElementById('defCont').innerHTML=renderWeek(meso,1);
+  document.getElementById('wkBadge').textContent='S.1';
+  document.getElementById('mesoBadge').textContent=M[meso].badge;
+}
+function selMMass(meso,btn){
+  document.querySelectorAll('#mnMass .mbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  cMass=meso;cWkM=1;
+  buildWkNav('wnMass',meso,1,selWk);
+  document.getElementById('massCont').innerHTML=renderWeek(meso,1);
+  document.getElementById('wkBadge').textContent='S.1';
+  document.getElementById('mesoBadge').textContent=M[meso].badge;
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.bnt').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('wkBadge').textContent = name==='def'?`S.${cWkD}`:name==='mass'?`S.${cWkM}`:'';
+  document.getElementById('mesoBadge').textContent = name==='def'?M[cDef].badge:name==='mass'?M[cMass].badge:'IL · V.10';
+}
+
+// ============================================================
+// PWA — SERVICE WORKER + INSTALL
+// ============================================================
+let deferredPrompt = null;
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); deferredPrompt=e;
+  const banner=document.getElementById('installBanner');
+  if(banner&&!localStorage.getItem('il10_installed'))banner.classList.add('show');
+});
+
+async function doInstall(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const{outcome}=await deferredPrompt.userChoice;
+  if(outcome==='accepted'){ localStorage.setItem('il10_installed','1'); }
+  deferredPrompt=null;
+  document.getElementById('installBanner').classList.remove('show');
+}
+function dismissInstall(){
+  document.getElementById('installBanner').classList.remove('show');
+  localStorage.setItem('il10_installed','dismissed');
+}
+
+window.addEventListener('appinstalled',()=>{ document.getElementById('installBanner').classList.remove('show'); });
+
+// Offline indicator
+window.addEventListener('online',()=>document.getElementById('offlineBadge').classList.remove('show'));
+window.addEventListener('offline',()=>document.getElementById('offlineBadge').classList.add('show'));
+if(!navigator.onLine) document.getElementById('offlineBadge').classList.add('show');
+
+// ============================================================
+// INIT
+// ============================================================
+buildWkNav('wnDef','m1',1,selWk);
+document.getElementById('defCont').innerHTML=renderWeek('m1',1);
+buildWkNav('wnMass','m4',1,selWk);
+document.getElementById('massCont').innerHTML=renderWeek('m4',1);
+document.getElementById('mesoBadge').textContent='IL · V.10';
+</script>
+</body>
+</html>
