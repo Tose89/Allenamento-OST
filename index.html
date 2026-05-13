@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TOSE">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="manifest" href="./manifest.json">
+<title>IRONLAB V.11 — TOSE</title>
+<style>
+:root{--bg:#0a0a0a;--s1:#111111;--s2:#1a1a1a;--bd:#2a2a2a;--bd2:#333333;--acc:#e8ff47;--acc2:#ff6b35;--tx:#f0f0f0;--mu:#bbbbbb;--fail:#f87171;--warn:#fbbf24;--ok:#4ade80;--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overscroll-behavior:none;}
+body{background:var(--bg);color:var(--tx);font-family:'Helvetica Neue',Arial,sans-serif;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4;}
+.hdr{position:sticky;top:0;z-index:200;background:rgba(10,10,10,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);padding:calc(12px + var(--safe-top)) 18px 12px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Arial Black',Impact,sans-serif;font-size:20px;letter-spacing:5px;color:var(--acc);}
+.logo span{color:var(--mu);}
+.hdr-r{display:flex;gap:7px;}
+.hbadge{background:var(--s2);border:1px solid var(--bd2);padding:3px 9px;border-radius:2px;font-family:'Courier New',monospace;font-size:9px;letter-spacing:1.5px;color:var(--acc);white-space:nowrap;}
+.hbadge.mu{color:var(--mu);}
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(10,10,10,.97);backdrop-filter:blur(16px);border-top:1px solid var(--bd);display:flex;padding-bottom:var(--safe-bot);}
+.bnt{flex:1;border:none;background:none;color:var(--mu);padding:11px 4px 9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:8px;letter-spacing:.5px;text-transform:uppercase;font-family:'Courier New',monospace;}
+.bnt svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.bnt.active{color:var(--acc);}
+.content{padding:16px 15px calc(72px + var(--safe-bot));max-width:860px;margin:0 auto;}
+.panel{display:none;animation:fu .2s ease;}
+.panel.active{display:block;}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.stitle{font-family:'Arial Black',Impact,sans-serif;font-size:26px;letter-spacing:3px;color:var(--acc);}
+.ssub{font-size:9px;color:var(--mu);letter-spacing:1.5px;margin-bottom:16px;text-transform:uppercase;margin-top:3px;}
+.aline{width:30px;height:2px;background:var(--acc);margin-bottom:14px;}
+.meso-nav{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.mbtn{background:var(--s2);border:1px solid var(--bd);color:var(--mu);padding:5px 10px;font-family:'Courier New',monospace;font-size:9px;cursor:pointer;border-radius:3px;transition:all .15s;white-space:nowrap;}
+.mbtn.active{background:rgba(232,255,71,.1);color:var(--acc);border-color:var(--acc);box-shadow:0 0 8px rgba(232,255,71,.1);}
+.wk-nav{display:flex;gap:3px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.wlbl{font-family:'Courier New',monospace;font-size:8px;color:var(--mu);letter-spacing:1px;margin-right:4px;text-transform:uppercase;}
+.wbtn{background:var(--s2);border:1px solid var(--bd);color:var(--mu);padding:4px 8px;font-family:'Courier New',monospace;font-size:9px;cursor:pointer;border-radius:3px;transition:all .15s;}
+.wbtn.active{background:rgba(232,255,71,.12);color:#000;border-color:var(--acc);font-weight:700;}
+.wbtn.dl{border-color:rgba(167,139,250,.4);color:#a78bfa;}
+.wbtn.dl.active{background:rgba(109,40,217,.15);color:#c4b5fd;border-color:#7c3aed;}
+.sess-tabs{display:flex;gap:0;margin-bottom:10px;background:var(--s1);border:1px solid var(--bd2);border-radius:6px;overflow:hidden;}
+.stab{flex:1;border:none;background:none;color:var(--mu);padding:9px 3px;cursor:pointer;font-family:'Courier New',monospace;font-size:8px;letter-spacing:.5px;text-transform:uppercase;transition:all .15s;border-right:1px solid var(--bd);}
+.stab:last-child{border-right:none;}
+.stab.active{background:rgba(232,255,71,.08);color:var(--acc);box-shadow:inset 0 -2px 0 var(--acc);}
+.s-status{display:block;font-size:7px;margin-top:2px;opacity:.7;}
+.sess-panel{display:none;}
+.sess-panel.active{display:block;animation:fu .2s ease;}
+.dc{background:var(--s1);border:1px solid var(--bd2);border-radius:6px;margin-bottom:10px;overflow:hidden;}
+.dc-hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--bd);cursor:pointer;}
+.dc-lbl{font-family:'Arial Black',Impact,sans-serif;font-size:13px;letter-spacing:.5px;color:var(--tx);}
+.dc-foc{font-size:9px;color:var(--mu);text-transform:uppercase;margin-top:2px;}
+.dc-tog{color:var(--mu);font-size:13px;transition:transform .25s;flex-shrink:0;margin-left:8px;}
+.dc.open .dc-tog{transform:rotate(180deg);}
+.dc-body{display:none;padding:11px 13px;}
+.dc.open .dc-body{display:block;}
+.ex{background:var(--s2);border:1px solid var(--bd);border-radius:4px;padding:10px 11px;margin-bottom:8px;}
+.ex-n{font-family:'Arial Black',Impact,sans-serif;font-size:12px;letter-spacing:.5px;margin-bottom:2px;}
+.ex-m{font-size:9px;color:var(--mu);font-family:'Courier New',monospace;margin-bottom:6px;}
+.tech{background:rgba(255,107,53,.07);border:1px solid rgba(255,107,53,.2);border-radius:3px;padding:6px 8px;margin-bottom:7px;font-size:11px;line-height:1.65;color:#ffb899;}
+.tech strong{color:var(--acc2);}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;min-width:310px;}
+th{font-size:8px;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);padding:4px 3px;text-align:left;border-bottom:1px solid var(--bd);}
+td{padding:5px 3px;vertical-align:middle;}
+tr:not(:last-child) td{border-bottom:1px solid rgba(232,255,71,.04);}
+.wi{font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:var(--acc);background:rgba(232,255,71,.06);border:1px solid rgba(232,255,71,.3);padding:3px 4px;border-radius:3px;width:54px;text-align:center;outline:none;transition:all .2s;-webkit-appearance:none;}
+.wi:focus{border-color:var(--acc);background:rgba(232,255,71,.12);}
+.wi::placeholder{color:var(--mu);font-size:8px;}
+.wi:disabled{opacity:1;}
+.wi-pre{border-color:rgba(232,255,71,.5);background:rgba(232,255,71,.08);}
+.edit-btn{border:1px solid var(--bd);background:none;color:var(--mu);font-size:11px;padding:2px 5px;border-radius:2px;cursor:pointer;}
+.sw{display:inline-flex;align-items:center;font-family:'Courier New',monospace;font-size:9px;padding:2px 5px;border-radius:2px;white-space:nowrap;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);color:var(--ok);}
+.sw.hold{background:rgba(251,146,60,.08);border-color:rgba(251,146,60,.3);color:#fb923c;}
+.sw.down{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--fail);}
+.sw.warn{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3);color:var(--warn);}
+.sw.dl{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.3);color:#a78bfa;}
+.rt{font-family:'Courier New',monospace;font-size:10px;padding:1px 5px;border-radius:2px;font-weight:700;}
+.r6{background:rgba(74,222,128,.15);color:#4ade80;}
+.r7{background:rgba(251,191,36,.12);color:var(--warn);}
+.r8{background:rgba(251,146,60,.12);color:#fb923c;}
+.r9{background:rgba(248,113,113,.12);color:var(--fail);}
+.fbb{border:1px solid var(--bd);background:none;color:var(--mu);font-size:9px;font-family:'Courier New',monospace;padding:3px 7px;border-radius:3px;cursor:pointer;transition:all .12s;white-space:nowrap;}
+.fbb:active{transform:scale(.93);}
+.fbb.ok{background:rgba(74,222,128,.15);border-color:#4ade80;color:#4ade80;}
+.fbb.fail{background:rgba(248,113,113,.12);border-color:var(--fail);color:var(--fail);}
+.fbb.rs{background:rgba(232,255,71,.12);border-color:var(--acc);color:var(--acc);}
+.fbrow{display:flex;gap:3px;flex-wrap:wrap;}
+.adv{display:none;margin-top:6px;padding:6px 9px;background:rgba(232,255,71,.04);border:1px solid rgba(232,255,71,.15);border-radius:3px;font-size:10px;color:var(--acc);font-family:'Courier New',monospace;line-height:1.6;}
+.adv.show{display:block;}
+.nb{background:var(--s2);border:1px solid var(--bd);border-radius:3px;padding:8px 11px;font-size:10px;color:var(--mu);line-height:1.7;margin-top:4px;}
+.nb em{color:var(--acc);font-style:normal;}.nb strong{color:var(--tx);}
+.tip{background:rgba(255,107,53,.07);border:1px solid rgba(255,107,53,.25);border-radius:4px;padding:9px 12px;font-size:11px;line-height:1.7;margin-bottom:11px;color:#ffb899;}
+.tip strong{color:var(--acc2);}
+.prog{background:rgba(232,255,71,.04);border:1px solid rgba(232,255,71,.12);border-radius:3px;padding:9px 11px;margin-top:9px;font-size:10px;line-height:1.7;color:#c8d490;}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px;}
+.stat{background:var(--s2);border:1px solid var(--bd2);border-radius:4px;padding:9px 8px;text-align:center;}
+.sv{font-family:'Arial Black',Impact,sans-serif;font-size:20px;color:var(--acc);}
+.sl{font-size:8px;color:var(--mu);text-transform:uppercase;letter-spacing:.8px;margin-top:1px;}
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:7px;margin-top:10px;}
+.ov-card{background:var(--s1);border:1px solid var(--bd);border-radius:4px;padding:10px;}
+.ov-ph{font-family:'Courier New',monospace;font-size:8px;color:var(--acc2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+.ov-nm{font-family:'Arial Black',Impact,sans-serif;font-size:13px;margin-bottom:4px;}
+.ov-mt{font-size:10px;color:var(--mu);line-height:1.55;}
+.mob{display:inline-block;padding:1px 6px;border-radius:2px;font-family:'Courier New',monospace;font-size:7px;letter-spacing:.8px;margin-bottom:4px;}
+.mob.def{background:rgba(0,200,80,.12);color:#00cc50;border:1px solid rgba(0,200,80,.25);}
+.mob.mass{background:rgba(255,170,0,.12);color:#ffaa00;border:1px solid rgba(255,170,0,.25);}
+.mob.base{background:rgba(0,136,255,.12);color:#0088ff;border:1px solid rgba(0,136,255,.25);}
+.mob.rest{background:rgba(120,120,120,.12);color:#888;border:1px solid rgba(120,120,120,.25);}
+.rpe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px;margin-top:8px;}
+.rpe-item{background:var(--s2);border:1px solid var(--bd);border-radius:3px;padding:8px 10px;display:flex;align-items:center;gap:8px;}
+.rpe-n{font-family:'Arial Black',Impact,sans-serif;font-size:18px;min-width:28px;}
+.rpe-d{font-size:10px;color:var(--mu);line-height:1.4;}
+.exp-btn{display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--bd2);color:var(--mu);padding:9px 13px;border-radius:4px;cursor:pointer;font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;transition:all .15s;width:100%;margin-top:8px;}
+.exp-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px;}
+@media(max-width:380px){.stat-row{grid-template-columns:repeat(2,1fr);}table{min-width:290px;}.wi{width:48px;font-size:11px;}}
+
+/* NUTRITION */
+.phase-block{background:var(--s1);border:1px solid var(--bd2);border-radius:6px;margin-bottom:14px;overflow:hidden;}
+.phase-hdr{padding:12px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.phase-hdr:active{background:var(--s2);}
+.phase-title{font-family:'Arial Black',Impact,sans-serif;font-size:14px;letter-spacing:1px;color:var(--tx);}
+.phase-sub{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.phase-body{display:none;padding:12px 14px;}
+.phase-block.open .phase-body{display:block;}
+.phase-block.open .dc-tog{transform:rotate(180deg);}
+.day-block{background:var(--s2);border:1px solid var(--bd);border-radius:4px;padding:10px 12px;margin-bottom:8px;}
+.day-title{font-family:'Courier New',monospace;font-size:10px;letter-spacing:2px;color:var(--acc);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.day-title::after{content:'';flex:1;height:1px;background:var(--bd);}
+.meal-row{padding:6px 0;border-bottom:1px solid rgba(232,255,71,.04);}
+.meal-row:last-child{border-bottom:none;}
+.meal-time{font-family:'Courier New',monospace;font-size:8px;color:var(--mu);letter-spacing:1px;margin-bottom:2px;}
+.meal-name{font-size:11px;font-weight:600;color:var(--tx);margin-bottom:3px;}
+.meal-items{font-size:11px;color:#e0e0e0;line-height:1.65;}
+.meal-items span{color:var(--mu);font-size:10px;}
+.meal-kcal{font-family:'Courier New',monospace;font-size:9px;color:var(--acc2);margin-top:3px;}
+.macro-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0;}
+.macro-item{background:var(--bg);border:1px solid var(--bd2);border-radius:3px;padding:7px 6px;text-align:center;}
+.macro-val{font-family:'Arial Black',Impact,sans-serif;font-size:16px;color:var(--acc2);}
+.macro-lbl{font-size:8px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+.alcohol-box{background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.2);border-radius:4px;padding:10px 12px;margin:8px 0;font-size:11px;line-height:1.7;color:#ffb899;}
+.alcohol-box strong{color:#fb923c;}
+.reset-box{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);border-radius:4px;padding:10px 12px;margin:8px 0;font-size:11px;line-height:1.7;color:#86efac;}
+.reset-box strong{color:#4ade80;}
+.rules-list{list-style:none;padding:0;}
+.rules-list li{padding:4px 0;font-size:11px;color:#e0e0e0;display:flex;gap:8px;align-items:flex-start;line-height:1.5;}
+.rules-list li::before{content:'▸';color:var(--acc2);flex-shrink:0;font-size:10px;margin-top:1px;}
+
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="logo">IRON<span>LAB</span></div>
+  <div class="hdr-r">
+    <div class="hbadge mu" id="mesoBadge">TOSE</div>
+    <div class="hbadge" id="wkBadge"></div>
+  </div>
+</div>
+<div id="tab-ov" class="panel active content">
+  <div class="stitle">PANORAMICA</div>
+  <div class="ssub">Programmazione Annuale · Metodo They · Home Gym</div>
+  <div class="aline"></div>
+  <div class="stat-row">
+    <div class="stat"><div class="sv">9</div><div class="sl">Mesocicli</div></div>
+    <div class="stat"><div class="sv">~40</div><div class="sl">Settimane</div></div>
+    <div class="stat"><div class="sv">3–4</div><div class="sl">Sess./Sett</div></div>
+    <div class="stat"><div class="sv">They</div><div class="sl">Metodo</div></div>
+  </div>
+  <div class="tip"><strong>ATTREZZATURA HOME GYM:</strong> Bilanciere olimpico · EZ-bar · 2 manubri regolabili · Panca inclinabile. Zero macchine — tutto adattato per il tuo setup.<br><br><strong>SESSIONI SEPARATE:</strong> Ogni settimana ha sessioni indipendenti (Lun/Mer/Ven o A/B/C). La sessione successiva mostra automaticamente il suggerimento di carico basato su quella precedente.</div>
+  <button class="exp-btn" onclick="exportData()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>ESPORTA DATI (JSON)</button>
+  <label class="exp-btn" onclick="document.getElementById('importFile').click()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>IMPORTA DATI (JSON)</label>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+  <div class="ov-grid">
+    <div class="ov-card"><div class="ov-ph">Maggio · 4 sett.</div><div class="mob base">BASE</div><div class="ov-nm">M1 — Riattivazione</div><div class="ov-mt">Full Body Slow-Motion · RPE 5–7 · 3 sess./sett</div></div>
+    <div class="ov-card"><div class="ov-ph">Giu–Lug · 6–8 sett.</div><div class="mob def">DEFIN.</div><div class="ov-nm">M2 — Shawn Ray</div><div class="ov-mt">Split A/B · RPE 7–8 · 4 sess./sett</div></div>
+    <div class="ov-card"><div class="ov-ph">Agosto · 6–8 sett.</div><div class="mob def">DEFIN.</div><div class="ov-nm">M3 — Bulk</div><div class="ov-mt">Full Body 3 sess./sett · CAT + Isotensivo</div></div>
+    <div class="ov-card"><div class="ov-ph">Settembre · 2–3 sett.</div><div class="mob rest">TRANS.</div><div class="ov-nm">T1 — Recupero</div><div class="ov-mt">Carichi 60% · RPE max 6</div></div>
+    <div class="ov-card"><div class="ov-ph">Ottobre · 6–9 sett.</div><div class="mob mass">MASSA</div><div class="ov-nm">M4 — Hatfield A</div><div class="ov-mt">Forza Base · Piramidale CAT</div></div>
+    <div class="ov-card"><div class="ov-ph">Novembre · 8–10 sett.</div><div class="mob mass">MASSA</div><div class="ov-nm">M5 — Hatfield B</div><div class="ov-mt">Forza Massimale · 1 fondamentale/seduta</div></div>
+    <div class="ov-card"><div class="ov-ph">Dicembre · 6–8 sett.</div><div class="mob mass">MASSA</div><div class="ov-nm">M6 — Hatfield C</div><div class="ov-mt">Forza Resistente · RI ridotto progressivamente</div></div>
+    <div class="ov-card"><div class="ov-ph">Gennaio · 8–10 sett.</div><div class="mob mass">MASSA</div><div class="ov-nm">M7 — Hatfield D</div><div class="ov-mt">Massa Muscolare · CAT + Isotensivo</div></div>
+    <div class="ov-card"><div class="ov-ph">Feb–Mar · 8–10 sett.</div><div class="mob mass">MASSA</div><div class="ov-nm">M8–M9 — Avanzato</div><div class="ov-mt">Ultra Anabolico + Massa-Potenza 1</div></div>
+  </div>
+</div>
+<div id="tab-def" class="panel content">
+  <div class="stitle">FASE 1</div><div class="ssub">Definizione · Maggio → Agosto</div><div class="aline"></div>
+  <div class="meso-nav" id="mnDef">
+    <button class="mbtn active" onclick="selMDef('m1',this)">M1 — Riattivazione</button>
+    <button class="mbtn" onclick="selMDef('m2',this)">M2 — Shawn Ray</button>
+    <button class="mbtn" onclick="selMDef('m3',this)">M3 — Bulk</button>
+    <button class="mbtn" onclick="selMDef('t1',this)">T1 — Transizione</button>
+  </div>
+  <div class="wk-nav" id="wnDef"></div>
+  <div id="defCont"></div>
+</div>
+<div id="tab-mass" class="panel content">
+  <div class="stitle">FASE 2</div><div class="ssub">Costruzione Massa · Ottobre → Marzo</div><div class="aline"></div>
+  <div class="meso-nav" id="mnMass">
+    <button class="mbtn active" onclick="selMMass('m4',this)">M4 — Hatfield A</button>
+    <button class="mbtn" onclick="selMMass('m5',this)">M5 — Hatfield B</button>
+    <button class="mbtn" onclick="selMMass('m6',this)">M6 — Hatfield C</button>
+    <button class="mbtn" onclick="selMMass('m7',this)">M7 — Hatfield D</button>
+    <button class="mbtn" onclick="selMMass('m8',this)">M8 — Ultra Anab.</button>
+    <button class="mbtn" onclick="selMMass('m9',this)">M9 — Massa-Pot.</button>
+  </div>
+  <div class="wk-nav" id="wnMass"></div>
+  <div id="massCont"></div>
+</div>
+<div id="tab-food" class="panel content">
+  <div class="stitle">ALIMENTAZIONE</div>
+  <div class="ssub">Calibrato sulla tua vita reale · 40 settimane</div>
+  <div class="aline"></div>
+
+  <div class="tip"><strong>REALTÀ:</strong> Vino ogni sera (~530 kcal/giorno feriale) + birre nel weekend (~750 kcal/giorno Ven–Dom). Il piano NON elimina l'alcol — lo integra. Il deficit viene recuperato nei pasti solidi, non privandoti di quello che ti piace.</div>
+
+  <!-- MACRO BASE -->
+  <div class="nb" style="margin-bottom:12px">
+    <strong>I TUOI DATI:</strong> 90 kg · 190 cm · ~36 anni · Maschio · Attività moderata<br>
+    <strong>TDEE stimato:</strong> ~2.700 kcal/giorno (giorni non allenamento) · ~3.000 kcal (giorni allenamento)<br>
+    <strong>Alcol settimanale:</strong> ~3L vino (~2.100 kcal) + ~5L birra (~2.250 kcal) = <em>~620 kcal/giorno in media</em><br>
+    <strong>Strategia:</strong> I pasti solidi forniscono ~1.200–1.400 kcal/giorno. Con l'alcol si arriva a ~1.800–2.000 kcal — deficit reale di ~700–900 kcal/die. Sufficiente per perdere grasso mantenendo il muscolo con le proteine alte.
+  </div>
+
+  <!-- FASE DEFINIZIONE -->
+  <div class="phase-block open" id="pb-def">
+    <div class="phase-hdr" onclick="togglePhase('pb-def')">
+      <div><div class="phase-title">FASE 1 — DEFINIZIONE</div><div class="phase-sub">Maggio → Agosto · Obiettivo: perdita grasso + riattivazione</div></div>
+      <div class="dc-tog" style="color:var(--mu);font-size:13px;transition:transform .25s;">▼</div>
+    </div>
+    <div class="phase-body">
+      <div class="macro-bar">
+        <div class="macro-item"><div class="macro-val">~1.300</div><div class="macro-lbl">kcal pasti</div></div>
+        <div class="macro-item"><div class="macro-val">160g</div><div class="macro-lbl">Proteine</div></div>
+        <div class="macro-item"><div class="macro-val">~80g</div><div class="macro-lbl">Carboidrati</div></div>
+        <div class="macro-item"><div class="macro-val">~40g</div><div class="macro-lbl">Grassi</div></div>
+      </div>
+
+      <div class="alcohol-box">
+        <strong>ALCOL IN QUESTA FASE:</strong><br>
+        Lun–Gio: ~2 bicchieri vino a cena (~260 kcal) — già nei calcoli. Non compensare saltando la cena.<br>
+        Ven–Dom: ~5 birre/sera (~750 kcal) — il sabato è giorno di reset (no carbs nei pasti solidi).<br>
+        <strong>Regola d'oro:</strong> anche bevendo, fai arrivare 160g di proteine dai pasti solidi ogni giorno.
+      </div>
+
+      <!-- LUN -->
+      <div class="day-block">
+        <div class="day-title">LUNEDÌ · MERCOLEDÌ · VENERDÌ — Giorni allenamento</div>
+        <div class="meal-row">
+          <div class="meal-time">13:00 — PRANZO</div>
+          <div class="meal-name">Proteine + Carboidrati + Verdure</div>
+          <div class="meal-items">200g petto di pollo / tacchino / merluzzo <span>(peso crudo)</span><br>80g riso basmati o pasta integrale <span>(peso secco)</span><br>300g verdure a piacere · 1 cucchiaio olio EVO<br><span>↳ Mangia 1–2h prima dell'allenamento se possibile — carbs pre-workout migliorano la performance</span></div>
+          <div class="meal-kcal">~650 kcal · P: 60g · C: 68g · G: 12g</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">16:30 — SPUNTINO</div>
+          <div class="meal-name">Proteine veloci</div>
+          <div class="meal-items">250g fiocchi di latte magri <span>(o 4 uova sode)</span><br>1 frutto piccolo (mela/pera)<br><span>↳ Post-allenamento ideale. Entro 2h dall'allenamento.</span></div>
+          <div class="meal-kcal">~300 kcal · P: 35g · C: 20g · G: 10g</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">20:00 — CENA</div>
+          <div class="meal-name">Proteine + Verdure + Vino</div>
+          <div class="meal-items">200g pesce / carne magra / uova (3–4 intere)<br>400g verdure saltate o al vapore · 1 cucchiaio olio EVO<br>No carboidrati la sera — le proteine saziano senza insulin spike<br><span>+ 2 bicchieri vino (~260 kcal già calcolati)</span></div>
+          <div class="meal-kcal">~380 kcal solidi · P: 52g · C: 8g · G: 18g</div>
+        </div>
+        <div class="meal-kcal" style="margin-top:8px;font-size:10px;border-top:1px solid var(--bd);padding-top:6px;">TOTALE PASTI SOLIDI: ~1.330 kcal · P: ~147g · C: ~96g · G: ~40g<br>+ Vino sera: ~260 kcal · TOTALE GIORNATA: ~1.590 kcal · Deficit reale: ~1.400 kcal</div>
+      </div>
+
+      <!-- MAR GIO -->
+      <div class="day-block">
+        <div class="day-title">MARTEDÌ · GIOVEDÌ — Giorni riposo</div>
+        <div class="meal-row">
+          <div class="meal-time">13:00 — PRANZO</div>
+          <div class="meal-name">Proteine + Carboidrati ridotti</div>
+          <div class="meal-items">200g carne magra / pesce / 4 uova<br>50g riso o pasta integrale <span>(porzione ridotta — non ti alleni)</span><br>300g verdure · 1 cucchiaio olio EVO</div>
+          <div class="meal-kcal">~550 kcal · P: 58g · C: 42g · G: 12g</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">16:30 — SPUNTINO</div>
+          <div class="meal-name">Proteine</div>
+          <div class="meal-items">250g fiocchi di latte magri <span>o 3 uova sode + 1 frutto</span></div>
+          <div class="meal-kcal">~280 kcal · P: 32g · C: 16g · G: 8g</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">20:00 — CENA + VINO</div>
+          <div class="meal-name">Proteine + Verdure</div>
+          <div class="meal-items">180g pesce / carne magra · 400g verdure · 1 cucchiaio olio EVO<br><span>+ 2 bicchieri vino (~260 kcal)</span></div>
+          <div class="meal-kcal">~340 kcal solidi · P: 44g · C: 6g · G: 16g</div>
+        </div>
+        <div class="meal-kcal" style="margin-top:8px;font-size:10px;border-top:1px solid var(--bd);padding-top:6px;">TOTALE PASTI SOLIDI: ~1.170 kcal · P: ~134g · C: ~64g · G: ~36g<br>+ Vino: ~260 kcal · TOTALE: ~1.430 kcal · Deficit reale: ~1.270 kcal</div>
+      </div>
+
+      <!-- VENERDÌ -->
+      <div class="day-block">
+        <div class="day-title">VENERDÌ — Allenamento + Inizio weekend</div>
+        <div class="meal-row">
+          <div class="meal-time">13:00 — PRANZO</div>
+          <div class="meal-name">Pranzo leggero pre-weekend</div>
+          <div class="meal-items">3 uova intere strapazzate · 150g tonno al naturale<br>Lattuga · pomodori · 1 cucchiaio olio EVO<br><span>Pranzo proteico leggero — il weekend porta calorie extra</span></div>
+          <div class="meal-kcal">~460 kcal · P: 58g · C: 6g · G: 22g</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">16:30 — SPUNTINO</div>
+          <div class="meal-name">Post-allenamento</div>
+          <div class="meal-items">250g fiocchi di latte magri · 1 frutto</div>
+          <div class="meal-kcal">~300 kcal · P: 35g · C: 20g · G: 10g</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">20:00 — SERATA 🍺</div>
+          <div class="meal-name">WEEKEND — È pianificato, non è uno sgarro</div>
+          <div class="meal-items">Birre, pizza, quello che vuoi.<br><span>↳ ~5 birre da 33cl = ~750 kcal. Il sabato di reset compensa tutto.</span><br><span>↳ Unica regola: domani mattina 1 litro d'acqua appena sveglio.</span></div>
+          <div class="meal-kcal">Libero — già nel piano</div>
+        </div>
+      </div>
+
+      <!-- SABATO -->
+      <div class="day-block">
+        <div class="day-title">SABATO — RESET DAY 🔄</div>
+        <div class="reset-box">
+          <strong>GIORNO DI RESET:</strong> Sabato è il giorno più importante del piano. Compensa il venerdì sera e prepara la domenica. Niente carboidrati raffinati — solo proteine, verdure e grassi buoni.
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">13:00 — PRANZO RESET</div>
+          <div class="meal-name">Proteine + Verdure — No carbs</div>
+          <div class="meal-items">5 uova intere strapazzate con spinaci e pomodorini<br>200g ceci lessati <span>(carboidrati complessi lenti — ok)</span><br>1 cucchiaio olio EVO · pepe · curcuma</div>
+          <div class="meal-kcal">~520 kcal · P: 52g · C: 34g · G: 24g</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">17:00 — SPUNTINO MINIMO</div>
+          <div class="meal-name">Leggero</div>
+          <div class="meal-items">150g yogurt greco magro · 1 frutto piccolo</div>
+          <div class="meal-kcal">~160 kcal · P: 18g · C: 14g · G: 2g</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">20:00 — CENA PROTEICA + BIRRE 🍺</div>
+          <div class="meal-name">Pesce o carne + ancora birre</div>
+          <div class="meal-items">250g salmone / branzino / orata al forno<br>400g verdure al vapore · 1 cucchiaio olio EVO<br><span>+ Birre sera (~750 kcal). La cena solida è leggera per compensare.</span></div>
+          <div class="meal-kcal">~380 kcal solidi · P: 54g · C: 4g · G: 16g</div>
+        </div>
+        <div class="meal-kcal" style="margin-top:8px;font-size:10px;border-top:1px solid var(--bd);padding-top:6px;">TOTALE PASTI SOLIDI: ~1.060 kcal · + Birre: ~750 kcal · TOTALE: ~1.810 kcal</div>
+      </div>
+
+      <!-- DOMENICA -->
+      <div class="day-block">
+        <div class="day-title">DOMENICA — Riposo + Rientro</div>
+        <div class="meal-row">
+          <div class="meal-time">13:00 — PRANZO LIBERO</div>
+          <div class="meal-name">Rientro graduale — mangia quello che vuoi</div>
+          <div class="meal-items">Pasta, riso, pizza — quello che ti va<br><span>↳ Non esagerare — domani si ricomincia. 1 piatto normale, non due.</span></div>
+          <div class="meal-kcal">~700–900 kcal · variabile</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">17:00 — SPUNTINO PREP</div>
+          <div class="meal-name">Prep settimana + spuntino</div>
+          <div class="meal-items">2 uova sode + 150g yogurt greco<br><span>💡 Cuoci 8–10 uova oggi: durano 7 giorni in frigo con guscio.</span><br><span>💡 Prepara 500g pollo/tacchino per i pranzi di lunedì e martedì.</span></div>
+          <div class="meal-kcal">~280 kcal · P: 28g · C: 14g · G: 10g</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">20:00 — CENA PROTEICA + BIRRE 🍺</div>
+          <div class="meal-name">Ultima serata del weekend</div>
+          <div class="meal-items">200g carne magra / pesce · 400g verdure · olio EVO<br><span>+ Birre sera (~750 kcal). Da domani si azzera tutto.</span></div>
+          <div class="meal-kcal">~360 kcal solidi · + Birre: ~750 kcal</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FASE MASSA -->
+  <div class="phase-block" id="pb-mass">
+    <div class="phase-hdr" onclick="togglePhase('pb-mass')">
+      <div><div class="phase-title">FASE 2 — COSTRUZIONE MASSA</div><div class="phase-sub">Ottobre → Marzo · Obiettivo: costruire muscolo con surplus moderato</div></div>
+      <div class="dc-tog" style="color:var(--mu);font-size:13px;transition:transform .25s;">▼</div>
+    </div>
+    <div class="phase-body">
+      <div class="macro-bar">
+        <div class="macro-item"><div class="macro-val">~1.600</div><div class="macro-lbl">kcal pasti</div></div>
+        <div class="macro-item"><div class="macro-val">180g</div><div class="macro-lbl">Proteine</div></div>
+        <div class="macro-item"><div class="macro-val">~130g</div><div class="macro-lbl">Carboidrati</div></div>
+        <div class="macro-item"><div class="macro-val">~50g</div><div class="macro-lbl">Grassi</div></div>
+      </div>
+
+      <div class="alcohol-box">
+        <strong>ALCOL IN FASE MASSA:</strong><br>
+        Il vino serale è mantenuto — ma in fase massa l'alcol inibisce la sintesi proteica nelle 24–48h successive. Strategia: concentra i pasti più ricchi di proteine e carboidrati nelle 2–3h prima e dopo l'allenamento. La finestra metabolica post-workout è più importante in questa fase.<br>
+        <strong>Birre weekend:</strong> invariate. Il sabato resta giorno di reset anche in fase massa.
+      </div>
+
+      <!-- GIORNI ALLENAMENTO MASSA -->
+      <div class="day-block">
+        <div class="day-title">GIORNI ALLENAMENTO — Fase Massa</div>
+        <div class="meal-row">
+          <div class="meal-time">13:00 — PRANZO (pre-allenamento ideale)</div>
+          <div class="meal-name">Carico carboidrati + Proteine</div>
+          <div class="meal-items">220g petto di pollo / tacchino / manzo magro <span>(peso crudo)</span><br>100g riso basmati o pasta integrale <span>(peso secco — +20g rispetto alla Fase 1)</span><br>300g verdure · 1,5 cucchiai olio EVO<br><span>↳ Pranzo 1–2h prima dell'allenamento: carbs disponibili per i carichi massimali</span></div>
+          <div class="meal-kcal">~780 kcal · P: 68g · C: 84g · G: 16g</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">16:30 — SPUNTINO POST-WORKOUT</div>
+          <div class="meal-name">Finestra anabolica — proteine veloci</div>
+          <div class="meal-items">300g fiocchi di latte magri <span>(+50g rispetto Fase 1)</span><br>1 banana o 2 fette pane integrale<br><span>↳ Entro 2h dall'allenamento. Finestra di sintesi proteica massima.</span></div>
+          <div class="meal-kcal">~380 kcal · P: 42g · C: 32g · G: 10g</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">20:00 — CENA + VINO</div>
+          <div class="meal-name">Proteine + Grassi buoni (no carbs serali)</div>
+          <div class="meal-items">220g pesce grasso (salmone/sgombro) o 4 uova intere + 2 albumi<br>400g verdure · 1,5 cucchiai olio EVO<br><span>+ 2 bicchieri vino (~260 kcal)</span><br><span>↳ In fase massa mantieni no-carbs la sera — i carbs vanno concentrati pre/post workout</span></div>
+          <div class="meal-kcal">~420 kcal solidi · P: 58g · C: 6g · G: 22g</div>
+        </div>
+        <div class="meal-kcal" style="margin-top:8px;font-size:10px;border-top:1px solid var(--bd);padding-top:6px;">TOTALE SOLIDI: ~1.580 kcal · P: ~168g · C: ~122g · G: ~48g<br>+ Vino: ~260 kcal · TOTALE: ~1.840 kcal · Surplus netto: ~+200 kcal (corretto per massa lean)</div>
+      </div>
+
+      <!-- GIORNI RIPOSO MASSA -->
+      <div class="day-block">
+        <div class="day-title">GIORNI RIPOSO — Fase Massa</div>
+        <div class="meal-row">
+          <div class="meal-time">13:00 — PRANZO</div>
+          <div class="meal-name">Proteine + Carboidrati moderati</div>
+          <div class="meal-items">200g carne magra / pesce / 4 uova<br>70g riso o pasta integrale <span>(ridotto rispetto ai giorni di allenamento)</span><br>300g verdure · 1 cucchiaio olio EVO</div>
+          <div class="meal-kcal">~650 kcal · P: 62g · C: 58g · G: 14g</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">16:30 — SPUNTINO</div>
+          <div class="meal-name">Proteine di mantenimento</div>
+          <div class="meal-items">250g fiocchi di latte magri · 1 frutto</div>
+          <div class="meal-kcal">~300 kcal · P: 35g · C: 20g · G: 10g</div>
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">20:00 — CENA + VINO</div>
+          <div class="meal-name">Proteine + Verdure</div>
+          <div class="meal-items">200g pesce / carne · 400g verdure · olio EVO<br><span>+ 2 bicchieri vino (~260 kcal)</span></div>
+          <div class="meal-kcal">~380 kcal solidi · + Vino ~260 kcal</div>
+        </div>
+        <div class="meal-kcal" style="margin-top:8px;font-size:10px;border-top:1px solid var(--bd);padding-top:6px;">TOTALE SOLIDI: ~1.330 kcal · + Vino: ~260 kcal · TOTALE: ~1.590 kcal</div>
+      </div>
+
+      <!-- WEEKEND MASSA (stesso reset) -->
+      <div class="day-block">
+        <div class="day-title">VENERDÌ / SABATO / DOMENICA — Fase Massa</div>
+        <div class="reset-box">
+          <strong>STESSO PROTOCOLLO WEEKEND:</strong> Venerdì libero · Sabato reset (no carbs nei pasti, proteine alte) · Domenica rientro.<br>
+          In fase massa il sabato di reset è ancora più importante — l'alcol del weekend inibisce la sintesi proteica. Compensare con proteine alte sabato/domenica minimizza il danno.
+        </div>
+        <div class="meal-row">
+          <div class="meal-time">Sabato reset</div>
+          <div class="meal-name">Stesso schema della Fase 1</div>
+          <div class="meal-items">5 uova + ceci + verdure a pranzo · yogurt greco spuntino · pesce + verdure a cena<br><span>+ Birre sera come sempre</span></div>
+          <div class="meal-kcal">~1.060 kcal solidi · + Birre ~750 kcal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGOLE FISSE -->
+  <div class="nb" style="margin-top:4px">
+    <strong>REGOLE CHE NON CAMBIANO MAI — 40 settimane:</strong><br><br>
+    <ul class="rules-list">
+      <li><strong>160g proteine minimo ogni giorno</strong> — anche venerdì sera con le birre. Le proteine proteggono il muscolo dall'alcol.</li>
+      <li><strong>Acqua: 3 litri/giorno</strong> — soprattutto sabato e domenica mattina. L'alcol disidrata e questo peggiora il recupero muscolare.</li>
+      <li><strong>Niente colazione</strong> — il digiuno intermittente naturale fino al pranzo favorisce la mobilizzazione dei grassi. Non rompere il digiuno con dolci o pane.</li>
+      <li><strong>Sabato è sempre reset</strong> — anche nelle settimane di deload dell'allenamento. Il piano alimentare non ha deload.</li>
+      <li><strong>Carboidrati concentrati intorno all'allenamento</strong> — pranzo pre-workout e spuntino post-workout. La sera no carbs raffinati.</li>
+      <li><strong>Olio EVO come fonte di grassi</strong> — non burro, non margarina. Max 2 cucchiai/pasto.</li>
+      <li><strong>Il vino della settimana non si tocca</strong> — è nel piano. Non sentirti in colpa, ti fa male solo se sostituisce le proteine.</li>
+    </ul>
+  </div>
+
+</div>
+
+<div id="tab-guide" class="panel content">
+  <div class="stitle">GUIDA RPE</div><div class="ssub">Scala intensità — Metodo They</div><div class="aline"></div>
+  <div class="tip"><strong>INTENSITÀ SECONDO THEY:</strong> Non è quanto pesa il bilanciere — è il numero di unità motorie coinvolte nella contrazione.</div>
+  <div class="rpe-grid">
+    <div class="rpe-item"><div class="rpe-n" style="color:#4ade80">5</div><div class="rpe-d">Molto facile. 5+ rep in riserva.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#86efac">6</div><div class="rpe-d">Facile. 4 rep in riserva.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#a3e635">7</div><div class="rpe-d">Moderato. 2–3 rep in riserva.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#fbbf24">7.5</div><div class="rpe-d">Quasi al limite. 2 rep, ultima dura.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#fb923c">8</div><div class="rpe-d">Buono. 1–2 rep con sforzo.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#f87171">8.5</div><div class="rpe-d">Duro. Forse 1 rep in più.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#ef4444">9</div><div class="rpe-d">Molto duro. 1 rep con massimo sforzo.</div></div>
+    <div class="rpe-item"><div class="rpe-n" style="color:#b91c1c">10</div><div class="rpe-d">Massimale assoluto.</div></div>
+  </div>
+  <div class="nb" style="margin-top:14px">
+    <strong>PROGRESSIONE:</strong><br><br>
+    <em>RPE ≤ 6</em> → <strong style="color:#4ade80">+5% sessione successiva</strong><br>
+    <em>RPE 7–7.5</em> → <strong style="color:#86efac">+2.5% sessione successiva</strong><br>
+    <em>RPE 8–8.5</em> → <strong style="color:#fbbf24">Mantieni stesso peso</strong><br>
+    <em>RPE 9+</em> → <strong style="color:#f87171">–5% sessione successiva</strong><br>
+    <em>✗ FAIL</em> → <strong style="color:#ef4444">–5% sessione successiva</strong><br><br>
+    <strong>CAT:</strong> Concentrica esplosiva, eccentrica frenata 3–4".<br>
+    <strong>ISOTENSIVO:</strong> 3"+3" costante. Tensione continua.<br>
+    <strong>PEAK CONTRACTION:</strong> Stop 2–3" al massimo avvicinamento.<br>
+    <strong>DELOAD:</strong> Ogni 4 sett. → 1 sett. al 60%. Ogni 6 sett. alta intensità → riposo completo.
+  </div>
+</div>
+<nav class="bnav">
+  <button class="bnt active" id="bn-ov" onclick="switchTab('ov',this)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Overview
+  </button>
+  <button class="bnt" id="bn-def" onclick="switchTab('def',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>Fase 1
+  </button>
+  <button class="bnt" id="bn-mass" onclick="switchTab('mass',this)">
+    <svg viewBox="0 0 24 24"><path d="M6 4h12M6 20h12M6 12h12M3 8l3-4M3 16l3 4M21 8l-3-4M21 16l-3 4"/></svg>Fase 2
+  </button>
+  <button class="bnt" id="bn-food" onclick="switchTab('food',this)"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>Dieta</button>
+  <button class="bnt" id="bn-guide" onclick="switchTab('guide',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>Guida
+  </button>
+</nav>
+<script>
+const M={
+  m1:{name:'M1 — Riattivazione',badge:'M1',weeks:4,dl:[],rpe:'5–7',note:'Slow-Motion Full Body · 3 sessioni/sett · R.I. 90" · Tecnica sopra tutto. Ogni sessione è indipendente — la successiva mostra il suggerimento basato su quella precedente.',sessPerWeek:3,sessLabel:['LUNEDÌ','MERCOLEDÌ','VENERDÌ'],days:[{lbl:'FULL BODY — SLOW-MOTION',foc:'Bilanciere · EZ-bar · Manubri · Panca',ex:[
+    {n:'Squat bilanciere',s:3,r:'12',rpe:'6',tech:'<strong>SLOW-MOTION 3+4":</strong> 3" scendi, 1" fermo, 4" risali. Piedi larghezza spalle. Schiena neutra. Carico secondario — controllo è tutto.'},
+    {n:'Panca piana bilanciere',s:3,r:'10',rpe:'6',tech:'<strong>SLOW-MOTION 3+4":</strong> 3" abbassa al petto, 1" stop, 4" spingi. Gomiti a 70°. Non rimbalzare sul petto.'},
+    {n:'Rematore bilanciere',s:3,r:'12',rpe:'6',tech:'<strong>SLOW-MOTION 3+4":</strong> Busto 45°, 3" tira verso ombelico, 4" abbassa. Sostituisce lat machine.'},
+    {n:'Lento avanti bilanciere (seduto)',s:3,r:'10',rpe:'6',tech:'<strong>SLOW-MOTION 3+4":</strong> Seduto sul bordo panca. 3" spingi, 4" abbassa.'},
+    {n:'Curl EZ-bar',s:2,r:'12',rpe:'6',tech:'<strong>PEAK CONTRACTION:</strong> Porta su lentamente, tieni 2" in cima, 4" abbassa. Gomiti fermi.'},
+    {n:'French press EZ-bar',s:2,r:'12',rpe:'6',tech:'<strong>SLOW-MOTION:</strong> Sdraiato. 3" abbassa dietro la testa, 4" spingi. Gomiti fissi.'},
+    {n:'Calf su gradino (corpo libero)',s:3,r:'20',rpe:'6',noW:true,tech:'<strong>ISOTENSIVO:</strong> Su un gradino. Sali 3", tieni 1", scendi 3" con tallone sotto il gradino.'},
+    {n:'Crunches',s:3,r:'20',rpe:'—',noW:true,tech:'Arrotola vertebra per vertebra. Contrai in cima, torna lento.'},
+  ]}]},
+  m2:{name:'M2 — Shawn Ray',badge:'M2',weeks:8,dl:[4,8],rpe:'7–8',note:'Split A/B · 4 sess./sett · Sess.1+3 = Gambe/Schiena/Bicipiti · Sess.2+4 = Petto/Spalle/Tricipiti · R.I. 90"–2\'.',sessPerWeek:4,sessLabel:['LUN','MAR','MER','SAB'],days:[
+    {lbl:'GAMBE / SCHIENA / BICIPITI',foc:'Squat · Rematore · Stacchi · EZ-bar',ex:[
+      {n:'Squat bilanciere',s:5,r:'6/8',rpe:'8',tech:'<strong>CAT:</strong> Concentrica esplosiva, eccentrica 3". Cosce parallele. Stop 1" in cima.'},
+      {n:'Stacchi rumeni bilanciere',s:3,r:'6/8',rpe:'7.5',tech:'<strong>CAT:</strong> Gambe quasi tese, schiena neutra. Stretch femorali in basso.'},
+      {n:'Rematore bilanciere',s:4,r:'6/8',rpe:'7.5',tech:'<strong>CAT:</strong> Busto 45°, verso ombelico. Range completo in basso.'},
+      {n:'Rematore presa supina bilanciere',s:3,r:'6/8',rpe:'7.5',tech:'<strong>CONTROLLO:</strong> Presa supina — coinvolge bicipiti e dorsale. Busto 45°.'},
+      {n:'Curl EZ-bar',s:3,r:'6/8',rpe:'7.5',tech:'<strong>CAT + PEAK:</strong> Concentrica esplosiva, tieni 2", discesa 4". Gomiti fissi.'},
+    ]},
+    {lbl:'PETTO / SPALLE / TRICIPITI',foc:'Panca · Manubri · Bilanciere · EZ-bar',ex:[
+      {n:'Panca piana bilanciere',s:5,r:'6/8',rpe:'8',tech:'<strong>CAT:</strong> Eccentrica 2–3", concentrica esplosiva. Stop 1" a braccia quasi estese.'},
+      {n:'Croci manubri panca inclinata 30°',s:3,r:'6/8',rpe:'7',tech:'<strong>ISOTENSIVO:</strong> Gomiti flessi. Stretch in basso, risali lento. Non schioccare in cima.'},
+      {n:'Alzate laterali manubri',s:3,r:'6/8',rpe:'7',tech:'<strong>CONTROLLO:</strong> Fino all\'altezza spalle. Mignolo in alto. Abbassa 3".'},
+      {n:'Lento avanti bilanciere seduto',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT:</strong> Dal livello orecchie in su. Se dolore: Arnold press manubri.'},
+      {n:'French press EZ-bar',s:4,r:'6/8',rpe:'7.5',tech:'<strong>SLOW ECCENTRICA:</strong> Abbassa in 4", spingi esplosivo. Gomiti paralleli.'},
+    ]}
+  ]},
+  m3:{name:'M3 — Bulk',badge:'M3',weeks:8,dl:[4,8],rpe:'7–8',note:'Full Body 3 sess./sett · R.I. 60"–90" · 1ª e ultima serie ISOTENSIVA, centrali CAT.',sessPerWeek:3,sessLabel:['LUNEDÌ','MERCOLEDÌ','VENERDÌ'],days:[{lbl:'FULL BODY — CAT + ISOTENSIVO',foc:'Bilanciere · EZ-bar · Manubri',ex:[
+    {n:'Panca piana bilanciere',s:6,r:'1×10·3×3·2×10',rpe:'7.5',tech:'<strong>1ª/ultime 2: ISOTENSIVO</strong> (3"+3"). <strong>Centrali ×3: CAT.</strong> Prima serie al 60%.'},
+    {n:'Squat bilanciere',s:6,r:'1×12·3×5·2×12',rpe:'7.5',tech:'<strong>1ª/ultime 2: ISOTENSIVO. Centrali: CAT.</strong>'},
+    {n:'Arnold press manubri',s:6,r:'1×10·3×4·2×10',rpe:'7',tech:'<strong>1ª/ultime 2: ISOTENSIVO. Centrali: CAT.</strong> Palmi verso di te in basso, ruota durante la spinta.'},
+    {n:'Rematore bilanciere',s:6,r:'1×12·3×5·2×10',rpe:'7.5',tech:'<strong>CAT su tutte le serie.</strong> Busto 45°. Verso ombelico.'},
+    {n:'Curl EZ-bar',s:5,r:'1×12·3×6·1×12',rpe:'7',tech:'<strong>PEAK CONTRACTION.</strong> Peak 2". Prima e ultima più leggere.'},
+    {n:'French press EZ-bar',s:6,r:'1×12·3×6·2×12',rpe:'7',tech:'<strong>SLOW ECCENTRICA.</strong> Abbassa in 4", spingi in 2".'},
+    {n:'Calf su gradino',s:4,r:'20',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO.</strong> Sali 3", tieni 1", scendi 3".'},
+    {n:'Crunches con disco',s:3,r:'20',rpe:'—',noW:true,tech:'Disco leggero al petto. Arrotola lentamente.'},
+  ]}]},
+  t1:{name:'T1 — Transizione',badge:'T1',weeks:3,dl:[],rpe:'max 6',note:'Recupero attivo · 2–3 sess./sett · Carichi al 60% di M3.',sessPerWeek:3,sessLabel:['LUNEDÌ','MERCOLEDÌ','VENERDÌ'],days:[{lbl:'RECUPERO ATTIVO',foc:'Full Body Leggero',ex:[
+    {n:'Squat bilanciere',s:3,r:'12/15',rpe:'5',tech:'60% del carico M3. Focus sulla sensazione muscolare.'},
+    {n:'Panca piana manubri',s:3,r:'12/15',rpe:'5',tech:'Manubri — meno stress articolare. Movimenti fluidi.'},
+    {n:'Rematore bilanciere',s:3,r:'12/15',rpe:'5',tech:'Leggero. Solo manutenzione.'},
+    {n:'Arnold press manubri',s:3,r:'12',rpe:'5',tech:'Solo manutenzione neuromuscolare.'},
+    {n:'Curl manubri alternato',s:2,r:'12',rpe:'5',tech:'Alternato, supinazione completa. Carico minimo.'},
+    {n:'Estensioni tricipiti manubrio sopra testa',s:2,r:'12',rpe:'5',tech:'1 manubrio con 2 mani sopra la testa. Range completo.'},
+    {n:'Calf + Crunches',s:3,r:'15/20',rpe:'—',noW:true,tech:'Mantenimento senza stress.'},
+  ]}]},
+  m4:{name:'M4 — Hatfield A',badge:'M4',weeks:8,dl:[4,8],rpe:'7–8',note:'Forza base · 3 sess./sett identiche · R.I. 2–3\' · Piramidale progressivo. CAT. Incrementa ogni settimana.',sessPerWeek:3,sessLabel:['LUNEDÌ','MERCOLEDÌ','VENERDÌ'],days:[{lbl:'FONDAMENTALI + COMPLEMENTARI',foc:'Squat · Panca · Rematore · Accessori',ex:[
+    {n:'Squat bilanciere',s:5,r:'12→6 (piramidale)',rpe:'7.5',tech:'<strong>PIRAMIDALE CAT:</strong> 1×12, 1×10, 1×8, 1×6, 1×6 max. Concentrica esplosiva, eccentrica 3".'},
+    {n:'Panca piana bilanciere',s:5,r:'12→6 (piramidale)',rpe:'7.5',tech:'<strong>PIRAMIDALE CAT:</strong> Stesso schema squat. Incrementa ogni settimana.'},
+    {n:'Rematore bilanciere',s:4,r:'12→6 (piramidale)',rpe:'7.5',tech:'<strong>CAT:</strong> Busto 45°. Sostituisce lat machine.'},
+    {n:'Arnold press manubri',s:3,r:'8/10',rpe:'7',tech:'<strong>CAT:</strong> Alterna con lento avanti ogni sessione.'},
+    {n:'Curl EZ-bar',s:3,r:'8/10',rpe:'7',tech:'<strong>PEAK CONTRACTION:</strong> Gomiti fissi. Prima tecnica, poi carico.'},
+    {n:'Stacchi rumeni bilanciere',s:3,r:'8/10',rpe:'7',tech:'<strong>CAT:</strong> Femorali e glutei. Schiena neutra.'},
+    {n:'Calf su gradino',s:4,r:'15',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO.</strong> Range completo.'},
+    {n:'Crunches con disco',s:3,r:'20',rpe:'—',noW:true,tech:'Progressione lenta del peso.'},
+  ]}]},
+  m5:{name:'M5 — Hatfield B',badge:'M5',weeks:8,dl:[4,8],rpe:'8–8.5',note:'Forza massimale · 3 sess./sett a rotazione · R.I. 3–5\' fondamentali.',sessPerWeek:3,sessLabel:['SESS. A','SESS. B','SESS. C'],days:[
+    {lbl:'SESSIONE A — SQUAT PRINCIPALE',foc:'Squat · Stacchi · Femorali',ex:[
+      {n:'Squat bilanciere (principale)',s:6,r:'12→massimale',rpe:'8.5',tech:'<strong>PIRAMIDALE PIENO CAT:</strong> 1×12(60%), 1×8(75%), 1×6(85%), 1×4(90%), 1×4(95%), 1×MAX. R.I. 3–5\'.'},
+      {n:'Stacchi da terra bilanciere',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT:</strong> Schiena neutra. Barra vicina al corpo. NON arrotondare la lombare.'},
+      {n:'Stacchi rumeni bilanciere',s:3,r:'8/10',rpe:'7',tech:'<strong>ISOTENSIVO:</strong> Gambe quasi tese. Stretch femorali.'},
+      {n:'Calf su gradino',s:4,r:'15/20',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO.</strong>'},
+      {n:'Crunches con disco',s:3,r:'15/20',rpe:'7',noW:true,tech:'Core forte = squat sicuri.'},
+    ]},
+    {lbl:'SESSIONE B — PANCA PRINCIPALE',foc:'Panca · Rematore · Braccia',ex:[
+      {n:'Panca piana bilanciere (principale)',s:6,r:'12→massimale',rpe:'8.5',tech:'<strong>PIRAMIDALE PIENO CAT:</strong> Stesso schema squat. R.I. 3–5\'.'},
+      {n:'Rematore bilanciere',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT:</strong> Verso ombelico. R.I. 2\'30".'},
+      {n:'Rematore manubrio 1 braccio',s:3,r:'8/10',rpe:'7',tech:'<strong>ISOTENSIVO:</strong> Ginocchio sulla panca. Verso anca.'},
+      {n:'Curl EZ-bar presa stretta',s:4,r:'6/8',rpe:'7.5',tech:'<strong>CAT + PEAK:</strong> Presa 15–20 cm. Brachiale coinvolto.'},
+      {n:'French press EZ-bar',s:4,r:'6/8',rpe:'7.5',tech:'<strong>CAT:</strong> Abbassa in 3", spingi esplosivo. Gomiti paralleli.'},
+    ]},
+    {lbl:'SESSIONE C — SPALLE PRINCIPALE',foc:'Deltoidi · Trapezi · Accessori',ex:[
+      {n:'Lento avanti bilanciere seduto',s:5,r:'6/10 (piramidale)',rpe:'8',tech:'<strong>PIRAMIDALE CAT:</strong> Fondamentale spalle. Alterna con Arnold press.'},
+      {n:'Tirate al mento EZ-bar',s:4,r:'6/8',rpe:'7.5',tech:'<strong>CAT:</strong> Gomiti in alto e fuori. Barra almeno al collo.'},
+      {n:'Alzate laterali manubri',s:4,r:'10/12',rpe:'7',tech:'<strong>SLOW 3+3":</strong> Volume e controllo costruiscono il deltoide.'},
+      {n:'Alzate posteriori manubri busto 90°',s:3,r:'10/12',rpe:'7',tech:'<strong>ISOTENSIVO:</strong> Busto 90°. Deltoide posteriore + romboidi.'},
+      {n:'Calf + Crunches',s:3,r:'15/20',rpe:'6',noW:true,tech:'Mantenimento.'},
+    ]}
+  ]},
+  m6:{name:'M6 — Hatfield C',badge:'M6',weeks:8,dl:[4,8],rpe:'8–8.5',note:'Forza resistente · 3 sess./sett (2×Schema A + 1×Schema B) · R.I. da 2\' a 60" ridotto ogni settimana.',sessPerWeek:3,sessLabel:['SCHEMA A','SCHEMA A','SCHEMA B'],days:[
+    {lbl:'SCHEMA A — PARTE SUPERIORE',foc:'Petto · Dorso · Spalle · Braccia',ex:[
+      {n:'Panca piana bilanciere',s:5,r:'4/10',rpe:'8',tech:'<strong>CAT · RI RIDOTTO:</strong> S1:2\' → S2:90" → S3:75" → S4:60". Peso invariato.'},
+      {n:'Rematore bilanciere',s:4,r:'4/10',rpe:'8',tech:'<strong>CAT · RI RIDOTTO:</strong> Se cali la forma, fermati.'},
+      {n:'Lento avanti bilanciere',s:4,r:'4/10',rpe:'7.5',tech:'<strong>CAT · RI RIDOTTO:</strong> Carico da M5.'},
+      {n:'Curl EZ-bar',s:4,r:'4/10',rpe:'7.5',tech:'<strong>PEAK · RI RIDOTTO:</strong> Bruciore muscolare = positivo.'},
+      {n:'French press EZ-bar',s:4,r:'4/10',rpe:'7.5',tech:'<strong>CAT · RI RIDOTTO:</strong>'},
+    ]},
+    {lbl:'SCHEMA B — PARTE INFERIORE',foc:'Quadricipiti · Femorali · Polpacci',ex:[
+      {n:'Squat bilanciere',s:5,r:'4/10',rpe:'8.5',tech:'<strong>CAT · RI RIDOTTO:</strong> Brutale sotto acidosi — mantieni la forma.'},
+      {n:'Stacchi rumeni bilanciere',s:4,r:'4/10',rpe:'8',tech:'<strong>CAT · RI RIDOTTO:</strong> Stretch femorali. Carico da M5.'},
+      {n:'Affondi bilanciere alternati',s:3,r:'8/12',rpe:'7.5',tech:'<strong>CONTROLLO:</strong> Passo lungo, ginocchio non oltre punta. Sostituisce leg extension.'},
+      {n:'Calf su gradino',s:5,r:'15/20',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO:</strong> 5 serie. Volume massimo.'},
+      {n:'Crunches con disco',s:3,r:'20/25',rpe:'7',noW:true,tech:'Core forte.'},
+    ]}
+  ]},
+  m7:{name:'M7 — Hatfield D',badge:'M7',weeks:10,dl:[5,10],rpe:'7.5–8',note:'Costruzione principale · Split 3 giorni · R.I. 90"–2\' · 1 fondamentale CAT + complementari isotensivi.',sessPerWeek:3,sessLabel:['GIORNO 1','GIORNO 2','GIORNO 3'],days:[
+    {lbl:'GIORNO 1 — PETTO',foc:'Pettorali · Panca · Manubri',ex:[
+      {n:'Panca piana bilanciere',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT — FONDAMENTALE:</strong> R.I. 90"–2\'. Eccentrica 3", concentrica esplosiva.'},
+      {n:'Croci manubri panca inclinata 30°',s:3,r:'12/15',rpe:'7',tech:'<strong>SLOW ISOTENSIVO:</strong> R.I. 60"–90". 3"+3". Stretch profondo.'},
+      {n:'Panca inclinata 30° manubri',s:3,r:'12/15',rpe:'7',tech:'<strong>SLOW ISOTENSIVO:</strong> Petto alto. 3"+3".'},
+    ]},
+    {lbl:'GIORNO 2 — DORSO / SPALLE',foc:'Dorsale · Trapezi · Deltoidi',ex:[
+      {n:'Rematore bilanciere',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT — FONDAMENTALE:</strong> R.I. 2\'. Verso ombelico.'},
+      {n:'Rematore manubrio 1 braccio',s:3,r:'12/15',rpe:'7',tech:'<strong>SLOW ISOTENSIVO:</strong> R.I. 60"–90". 3"+3".'},
+      {n:'Lento avanti bilanciere (o Arnold press)',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT — FONDAMENTALE SPALLE:</strong> R.I. 90".'},
+      {n:'Alzate laterali manubri',s:3,r:'12/15',rpe:'7',tech:'<strong>SLOW ISOTENSIVO:</strong> 3"+3".'},
+    ]},
+    {lbl:'GIORNO 3 — GAMBE / BRACCIA',foc:'Gambe · Bicipiti · Tricipiti · Polpacci',ex:[
+      {n:'Squat bilanciere',s:4,r:'6/8',rpe:'8',tech:'<strong>CAT — FONDAMENTALE:</strong> R.I. 2\'. Sotto la parallela.'},
+      {n:'Stacchi rumeni bilanciere',s:3,r:'12/15',rpe:'7',tech:'<strong>SLOW ISOTENSIVO:</strong> R.I. 90". Femorali. 3"+3".'},
+      {n:'Affondi manubri alternati',s:3,r:'12/15',rpe:'7',tech:'<strong>SLOW:</strong> Alternati. Passo lungo.'},
+      {n:'Curl EZ-bar',s:3,r:'6/8',rpe:'7.5',tech:'<strong>CAT + PEAK:</strong> R.I. 90". Fondamentale bicipiti.'},
+      {n:'Curl manubri alternato',s:2,r:'10/12',rpe:'7',tech:'<strong>PEAK:</strong> Supinazione completa. Mignolo verso l\'alto.'},
+      {n:'French press EZ-bar',s:3,r:'10/12',rpe:'7.5',tech:'<strong>SLOW ECCENTRICA:</strong> Abbassa in 4", spingi esplosivo. Gomiti fissi.'},
+      {n:'Calf su gradino',s:4,r:'15/20',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO:</strong> Range completo.'},
+    ]}
+  ]},
+  m8:{name:'M8 — Ultra Anabolico',badge:'M8',weeks:10,dl:[5,10],rpe:'8–8.5',note:'Schema A/B/C · R.I. 2–3\' · Stimola GH e testosterone endogeni.',sessPerWeek:3,sessLabel:['SEDUTA A','SEDUTA B','SEDUTA C'],days:[
+    {lbl:'SEDUTA A — DORSALE / FEMORALI / TRICIPITI',foc:'Stacchi · Rematore · Tricipiti',ex:[
+      {n:'Stacchi da terra bilanciere',s:4,r:'6/10',rpe:'8',tech:'<strong>CAT:</strong> Dal pavimento. Schiena neutra. Tra i più anabolici.'},
+      {n:'Rematore bilanciere presa supina',s:2,r:'6/10',rpe:'8',tech:'<strong>CONTROLLO:</strong> Presa supina — dorsale + bicipiti. Busto 45°.'},
+      {n:'Rematore manubrio 1 braccio',s:2,r:'6/10',rpe:'7.5',tech:'<strong>PEAK:</strong> Verso anca. Ruota busto per più range.'},
+      {n:'Stacchi rumeni bilanciere',s:3,r:'6/10',rpe:'8',tech:'<strong>FULL ROM:</strong> Gambe quasi tese. Femorali e glutei. Stretch massimo.'},
+      {n:'French press EZ-bar',s:3,r:'6/10',rpe:'7.5',tech:'<strong>SLOW ECCENTRICA:</strong> Abbassa in 4", spingi in 2".'},
+      {n:'Estensioni tricipiti manubrio sopra testa',s:3,r:'6/10',rpe:'7.5',tech:'<strong>PEAK:</strong> 1 manubrio con 2 mani. Estendi completamente.'},
+    ]},
+    {lbl:'SEDUTA B — PETTO / SPALLE / BICIPITI',foc:'Petto · Deltoidi · Bicipiti',ex:[
+      {n:'Panca piana bilanciere',s:3,r:'6/10',rpe:'8',tech:'<strong>CAT:</strong> Eccentrica 3", concentrica esplosiva. R.I. 2\'.'},
+      {n:'Croci manubri panca inclinata 30°',s:3,r:'6/10',rpe:'7.5',tech:'<strong>ISOTENSIVO:</strong> Stretch profondo. 3"+3".'},
+      {n:'Arnold press manubri seduto',s:3,r:'6/10',rpe:'8',tech:'<strong>CAT:</strong> Palmi verso di te → ruota durante la spinta.'},
+      {n:'Alzate laterali manubri',s:3,r:'6/10',rpe:'7',tech:'<strong>CONTROLLO:</strong> Fino alle spalle. Abbassa 3".'},
+      {n:'Curl EZ-bar presa stretta',s:3,r:'6/10',rpe:'7.5',tech:'<strong>CAT + PEAK:</strong> Presa 15–20 cm. Peak 2".'},
+      {n:'Curl concentrazione manubrio',s:2,r:'6/10',rpe:'7',tech:'<strong>IPERSUPINAZIONE:</strong> Gomito al ginocchio. Ruota mignolo fuori in cima.'},
+    ]},
+    {lbl:'SEDUTA C — GAMBE COMPLETE',foc:'Quad · Femorali · Polpacci · Addome',ex:[
+      {n:'Squat bilanciere',s:3,r:'6/10 (piramidale)',rpe:'8',tech:'<strong>CAT:</strong> 1×10, 1×8, 1×6. Il Re.'},
+      {n:'Front squat bilanciere (o goblet squat manubrio)',s:3,r:'6/10',rpe:'7.5',tech:'<strong>SLOW:</strong> Bilanciere davanti al petto o manubrio al petto. Busto verticale. Isola i quadricipiti.'},
+      {n:'Affondi manubri alternati',s:3,r:'6/10',rpe:'7',tech:'<strong>CONTROLLO:</strong> Passo lungo. Femorali e glutei.'},
+      {n:'Calf su gradino 1 gamba',s:3,r:'15/20',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO:</strong> 1 gamba. Gastrocnemio in stiramento profondo.'},
+      {n:'Calf su gradino 2 gambe',s:3,r:'20/25',rpe:'7',noW:true,tech:'<strong>ISOTENSIVO:</strong> Range completo.'},
+      {n:'Crunches + Leg raises',s:4,r:'15/max',rpe:'7',noW:true,tech:'Circuito: 15 crunches → 15" rest → max leg raises.'},
+    ]}
+  ]},
+  m9:{name:'M9 — Massa-Potenza 1',badge:'M9',weeks:8,dl:[4,8],rpe:'8.5–9',note:'Picco del ciclo · 3 sess./sett · R.I. 2–3\' fondamentali, 60"–90" complementari.',sessPerWeek:3,sessLabel:['GIORNO 1','GIORNO 2','GIORNO 3'],days:[
+    {lbl:'GIORNO 1 — GAMBE',foc:'Quadricipiti · Femorali · Polpacci',ex:[
+      {n:'Squat bilanciere (principale)',s:6,r:'10→massimale',rpe:'9',tech:'<strong>CAT PIRAMIDALE PIENO:</strong> 1×10(60%), 1×6(80%), 1×4(90%), 1×4(95%), 1×4(97%), 1×MAX. R.I. 3–5\'.'},
+      {n:'Squat bilanciere (volume)',s:4,r:'10→4 (piramidale)',rpe:'8',tech:'<strong>PIRAMIDALE CAT:</strong> Complementare pesante. R.I. 2\'.'},
+      {n:'Affondi bilanciere alternati',s:3,r:'12',rpe:'7',tech:'<strong>CONTROLLO:</strong> Passo lungo. Femorali e glutei.'},
+      {n:'Stacchi rumeni bilanciere',s:4,r:'15→8 (piramidale)',rpe:'7.5',tech:'<strong>SLOW:</strong> Femorali pre-affaticati. Stretch massimo.'},
+      {n:'Calf su gradino pesante (bilanciere sulle spalle)',s:3,r:'6/8',rpe:'8',tech:'<strong>ESPLOSIVO:</strong> Bilanciere sulle spalle su gradino. 6 rep pesanti.'},
+    ]},
+    {lbl:'GIORNO 2 — PETTO / BRACCIA',foc:'Petto · Bicipiti · Tricipiti',ex:[
+      {n:'Panca piana bilanciere (piramidale pieno)',s:6,r:'15→massimale',rpe:'9',tech:'<strong>PIRAMIDALE PIENO CAT:</strong> 1×15(50%), 1×12(65%), 1×10(75%), 1×6(85%), 1×2(95%), 1×MAX. Il picco del ciclo.'},
+      {n:'Panca inclinata 30° manubri',s:3,r:'10/12',rpe:'7.5',tech:'<strong>ISOTENSIVO:</strong> Petto alto. R.I. 90". 3"+3".'},
+      {n:'Croci manubri panca inclinata',s:3,r:'10/12',rpe:'7',tech:'<strong>ISOTENSIVO:</strong> Stretch profondo. R.I. 90".'},
+      {n:'Curl EZ-bar presa stretta',s:4,r:'8/10',rpe:'7.5',tech:'<strong>CAT + PEAK:</strong> Concentrica esplosiva, peak 2", eccentrica 4". R.I. 90".'},
+      {n:'French press EZ-bar',s:4,r:'8/10',rpe:'7.5',tech:'<strong>SLOW ECCENTRICA:</strong> Abbassa in 4", spingi in 2". R.I. 90".'},
+    ]},
+    {lbl:'GIORNO 3 — DORSO / SPALLE',foc:'Dorsale · Trapezi · Deltoidi',ex:[
+      {n:'Stacchi da rack bilanciere + Massimali',s:9,r:'6/8 + 5×1',rpe:'9',tech:'<strong>MASSIMALI SINGOLI:</strong> 4×6/8 fino al 90–95%, poi 5 singoli massimali. R.I. 4–5\'.'},
+      {n:'Rematore bilanciere',s:3,r:'10/15',rpe:'7',tech:'<strong>CONTROLLO:</strong> R.I. 90". Carichi moderati dopo i massimali.'},
+      {n:'Rematore manubrio 1 braccio',s:3,r:'10/15',rpe:'7',tech:'<strong>ISOTENSIVO:</strong> R.I. 90". 3"+3".'},
+      {n:'Lento avanti bilanciere (piramidale)',s:5,r:'15→6',rpe:'8.5',tech:'<strong>PIRAMIDALE CAT:</strong> 1×15, 1×12, 1×10, 1×8, 1×6. R.I. 2\'.'},
+      {n:'Alzate laterali manubri 1 braccio',s:3,r:'10/12',rpe:'7',tech:'<strong>CONTROLLO:</strong> Appoggiato. Più range, meno compensazioni.'},
+      {n:'Alzate posteriori manubri busto 90°',s:3,r:'10/12',rpe:'7',tech:'<strong>ISOTENSIVO:</strong> Deltoide posteriore + romboidi.'},
+    ]}
+  ]}
+};
+
+// STORAGE
+const FB=(()=>{try{return JSON.parse(localStorage.getItem('il11_fb')||'{}')}catch(e){return{}}})();
+function save(){try{localStorage.setItem('il11_fb',JSON.stringify(FB))}catch(e){}}
+function fbk(m,w,sess,d,e,s){return`${m}_w${w}_s${sess}_d${d}_e${e}_s${s}`;}
+
+// EXPORT/IMPORT
+function exportData(){const data={version:'il11',date:new Date().toISOString(),fb:FB};const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`ironlab-tose-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);}
+function importData(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.fb){Object.assign(FB,d.fb);save();alert('Dati importati.');location.reload();}}catch(err){alert('File non valido.');}};r.readAsText(file);}
+
+// HELPER — indice del giorno in base al mesociclo e alla sessione
+function getDayIdx(meso,sess){
+  const md=M[meso];
+  if(md.days.length===1)return 0;
+  if(meso==='m2')return(sess===1||sess===3)?1:0;
+  if(['m5','m7','m8','m9'].includes(meso))return Math.min(sess,md.days.length-1);
+  if(meso==='m6')return sess===2?1:0;
+  return 0;
+}
+
+// PROGRESSIONE — basata sulla stessa tipologia di sessione
+function rnd(kg){return Math.round(kg*2)/2;}
+function calcNext(meso,week,sess,di,ei){
+  const md=M[meso];if(!md)return null;
+  const ex=md.days[di]?.ex[ei];if(!ex)return null;
+  // For single-day mesos (M1/M3/M4/T1): compare to immediately previous session
+  // For multi-day mesos (M2/M5/M6/M7/M8/M9): compare to same session index, previous week
+  let pw,ps;
+  if(md.days.length===1){
+    // All sessions same day template: compare to previous session (same week or prev week)
+    pw=week;ps=sess-1;
+    if(ps<0){pw=week-1;ps=md.sessPerWeek-1;}
+  } else {
+    // Rotating sessions: compare to same session slot, previous week
+    pw=week-1;ps=sess;
+  }
+  if(pw<1)return null;
+  let kg=[],fails=0,rpes=[],hd=false;
+  // For multi-day mesos, use same di (same muscle group)
+  const prevDi=md.days.length===1?di:getDayIdx(meso,ps);
+  for(let s=0;s<ex.s;s++){
+    const st=FB[fbk(meso,pw,ps,prevDi,ei,s)]||{};
+    if(st.kg!=null){kg.push(st.kg);hd=true;}
+    if(st.completed===false){fails++;hd=true;}
+    if(st.completed!==undefined)hd=true;
+    if(st.rpe){rpes.push(parseFloat(st.rpe));hd=true;}
+  }
+  if(!hd)return null;
+  const ref=kg.length?kg[kg.length-1]:null;
+  const avg=rpes.length?rpes.reduce((a,b)=>a+b,0)/rpes.length:null;
+  let nw=week,ns=sess+1;
+  const md2=M[meso];if(ns>=md2.sessPerWeek){nw=week+1;ns=0;}
+  const ndl=md2.dl.includes(nw);
+  if(ndl&&ref){const dk=rnd(ref*.6);return{kg:dk,type:'dl',lbl:`⬇ DELOAD → ${dk}kg`};}
+  if(fails>0){if(ref){const nk=rnd(ref*.95);return{kg:nk,type:'down',lbl:`✗ FAIL → ${nk}kg`};}return{kg:null,type:'down',lbl:'✗ FAIL → −5%'};}
+  if(!avg&&!ref)return{kg:null,type:'warn',lbl:'Inserisci carico e RPE'};
+  if(!avg)return{kg:ref,type:'warn',lbl:`${ref}kg — inserisci RPE`};
+  if(avg<=6){const nk=ref?rnd(ref*1.05):null;return{kg:nk,type:'up',lbl:nk?`📈 RPE${avg.toFixed(1)} → ${nk}kg (+5%)`:'📈 +5%'};}
+  if(avg<=7.5){const nk=ref?rnd(ref*1.025):null;return{kg:nk,type:'up',lbl:nk?`📈 RPE${avg.toFixed(1)} → ${nk}kg (+2.5%)`:'📈 +2.5%'};}
+  if(avg<=8.5)return{kg:ref,type:'hold',lbl:`↔ RPE${avg.toFixed(1)} → ${ref?ref+'kg':'stesso'}`};
+  const nk=ref?rnd(ref*.95):null;
+  return{kg:nk,type:'warn',lbl:nk?`⚠ RPE${avg.toFixed(1)} → ${nk}kg`:'⚠ −5%'};
+}
+function swCls(t){return t==='up'?'':t==='hold'?' hold':t==='down'?' down':t==='dl'?' dl':' warn';}
+
+// RENDER EXERCISE
+function renderEx(meso,week,sess,di,ei,ex){
+  const md=M[meso];const isDl=md.dl.includes(week);
+  const noW=ex.noW||ex.rpe==='—';
+  const rc=parseFloat(ex.rpe)>=9?'r9':parseFloat(ex.rpe)>=8?'r8':parseFloat(ex.rpe)>=7?'r7':'r6';
+  let sugg='';
+  if(!noW){
+    const sid=`sg-${meso}-w${week}-s${sess}-d${di}-e${ei}`;
+    const p=calcNext(meso,week,sess,di,ei);
+    if(week===1&&sess===0){
+      sugg=`<div style="margin-bottom:6px;"><span style="font-size:9px;color:var(--acc2);font-family:'Courier New',monospace;">⚡ PRIMA SESSIONE — Usa carico tecnico di rodaggio</span></div>`;
+    } else {
+      sugg=`<div style="margin-bottom:6px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+        <span style="font-size:8px;color:var(--mu);font-family:'Courier New',monospace;text-transform:uppercase;">Sess.prec →</span>
+        <span id="${sid}" class="sw${p?swCls(p.type):''}">${p?p.lbl:'Completa la sessione precedente'}</span>
+      </div>`;
+    }
+  }
+  let rows='';
+  for(let s=0;s<ex.s;s++){
+    const k=fbk(meso,week,sess,di,ei,s);const st=FB[k]||{};
+    const hasKg=st.kg!=null;
+    let pre='';
+    if(!hasKg&&!(week===1&&sess===0)&&!noW){const pv=calcNext(meso,week,sess,di,ei);if(pv&&pv.kg!==null)pre=pv.kg;}
+    const disp=hasKg?st.kg:pre;
+    const ps2=(!hasKg&&pre!=='')?'class="wi wi-pre"':'class="wi"';
+    const wc=noW
+      ?`<span style="font-family:'Courier New',monospace;font-size:9px;color:var(--mu)">—</span>`
+      :`<div style="display:flex;align-items:center;gap:3px;">
+          <input ${ps2} id="wi-${k}" type="number" min="0" step="0.5" placeholder="kg" value="${disp}"
+            ${hasKg?'disabled':''}
+            onblur="lkW(this)" onkeydown="if(event.key==='Enter')this.blur()"
+            data-meso="${meso}" data-week="${week}" data-sess="${sess}" data-di="${di}" data-ei="${ei}" data-si="${s}">
+          <button class="edit-btn" id="ed-${k}" onclick="ulW('${k}')" style="${hasKg?'':'display:none'}">✏</button>
+        </div>`;
+    const okC=st.completed===true?' ok':'';const flC=st.completed===false?' fail':'';
+    const rbtns=['6','7','7.5','8','8.5','9'].map(r=>{
+      const rc2=st.rpe===r?' rs':'';
+      return `<button id="fr-${k}-${r}" class="fbb${rc2}" onclick="setFB('${meso}',${week},${sess},${di},${ei},${s},'rpe','${r}')">${r}</button>`;
+    }).join('');
+    rows+=`<tr>
+      <td><span style="font-family:'Courier New',monospace;font-size:10px;color:var(--mu)">${s+1}</span></td>
+      <td><span style="font-family:'Courier New',monospace;font-size:10px">${ex.r}</span></td>
+      <td><span class="rt ${rc}">${noW?'—':'RPE '+ex.rpe}</span></td>
+      <td>${wc}</td>
+      <td><div class="fbrow"><button id="fo-${k}" class="fbb${okC}" onclick="setFB('${meso}',${week},${sess},${di},${ei},${s},'completed',true)">✓ SÌ</button><button id="ff-${k}" class="fbb${flC}" onclick="setFB('${meso}',${week},${sess},${di},${ei},${s},'completed',false)">✗ FAIL</button></div></td>
+      <td><div class="fbrow">${rbtns}</div></td>
+    </tr>`;
+  }
+  return `<div class="ex">
+    <div class="ex-n">${ei+1}. ${ex.n.toUpperCase()}</div>
+    <div class="ex-m">${ex.s} SERIE × ${ex.r} REP${noW?'':' · RPE '+ex.rpe}${isDl?' · ⚡ DELOAD — 60%':''}</div>
+    <div class="tech">${ex.tech}</div>
+    ${sugg}
+    <div class="tbl-wrap"><table><thead><tr><th>S.</th><th>REP</th><th>RPE TARGET</th><th>KG</th><th>OK?</th><th>RPE REALE</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="adv" id="adv-${meso}-w${week}-s${sess}-d${di}-e${ei}" data-sets="${ex.s}"></div>
+  </div>`;
+}
+
+// RENDER WEEK
+
+
+function renderWeek(meso,week){
+  const md=M[meso];const isDl=md.dl.includes(week);
+  let h='';
+  if(isDl)h+=`<div class="tip"><strong>🔄 DELOAD:</strong> Tutti i carichi al 60%. RPE max 5–6. Non saltarlo.</div>`;
+  h+=`<div class="nb" style="margin-bottom:10px"><em>${md.name}</em> · RPE: <strong>${md.rpe}</strong><br>${md.note}</div>`;
+  h+=`<div class="sess-tabs" id="stabs-${meso}-w${week}">`;
+  for(let sess=0;sess<md.sessPerWeek;sess++){
+    const lbl=md.sessLabel[sess]||`SESS ${sess+1}`;
+    const done=isSessDone(meso,week,sess);
+    h+=`<button class="stab${sess===0?' active':''}" id="stab-${meso}-w${week}-s${sess}" onclick="selSess('${meso}',${week},${sess})">${lbl}<span class="s-status">${done?'✓ FATTO':'—'}</span></button>`;
+  }
+  h+=`</div>`;
+  for(let sess=0;sess<md.sessPerWeek;sess++){
+    const di=getDayIdx(meso,sess);
+    const day=md.days[di];
+    h+=`<div class="sess-panel${sess===0?' active':''}" id="sp-${meso}-w${week}-s${sess}">`;
+    h+=`<div class="dc open" id="dc-${meso}-w${week}-s${sess}"><div class="dc-hdr" onclick="tD('dc-${meso}-w${week}-s${sess}')"><div><div class="dc-lbl">${day.lbl}</div><div class="dc-foc">${day.foc}</div></div><div class="dc-tog">▼</div></div><div class="dc-body">`;
+    day.ex.forEach((ex,ei)=>{h+=renderEx(meso,week,sess,di,ei,ex);});
+    h+=`<div class="prog"><strong>📋</strong> Riscaldamento 5–10 min mobilità + 2 serie a vuoto sui fondamentali. Defaticamento 5 min stretching.${isDl?'<br><strong>DELOAD: carico al 60%.</strong>':''}</div>`;
+    h+=`</div></div></div>`;
+  }
+  return h;
+}
+
+function isSessDone(meso,week,sess){
+  const di=getDayIdx(meso,sess);
+  const day=M[meso].days[di];
+  return day.ex.some((ex,ei)=>{
+    for(let s=0;s<ex.s;s++){const st=FB[fbk(meso,week,sess,di,ei,s)]||{};if(st.completed!==undefined)return true;}
+    return false;
+  });
+}
+
+function selSess(meso,week,sess){
+  const md=M[meso];
+  for(let i=0;i<md.sessPerWeek;i++){
+    document.getElementById(`stab-${meso}-w${week}-s${i}`)?.classList.remove('active');
+    document.getElementById(`sp-${meso}-w${week}-s${i}`)?.classList.remove('active');
+  }
+  document.getElementById(`stab-${meso}-w${week}-s${sess}`)?.classList.add('active');
+  document.getElementById(`sp-${meso}-w${week}-s${sess}`)?.classList.add('active');
+}
+
+// FEEDBACK
+function setFB(meso,week,sess,di,ei,si,type,val){
+  const k=fbk(meso,week,sess,di,ei,si);
+  if(!FB[k])FB[k]={};FB[k][type]=val;save();
+  updUI(meso,week,sess,di,ei,si);
+  updAdv(meso,week,sess,di,ei);
+  updNextSg(meso,week,sess,di,ei);
+  updSessTab(meso,week,sess);
+}
+function updUI(meso,week,sess,di,ei,si){
+  const k=fbk(meso,week,sess,di,ei,si);const st=FB[k]||{};
+  const ob=document.getElementById(`fo-${k}`);const fb2=document.getElementById(`ff-${k}`);
+  if(ob)ob.className='fbb'+(st.completed===true?' ok':'');
+  if(fb2)fb2.className='fbb'+(st.completed===false?' fail':'');
+  for(const r of['6','7','7.5','8','8.5','9']){const b=document.getElementById(`fr-${k}-${r}`);if(b)b.className='fbb'+(st.rpe===r?' rs':'');}
+}
+function updAdv(meso,week,sess,di,ei){
+  const el=document.getElementById(`adv-${meso}-w${week}-s${sess}-d${di}-e${ei}`);if(!el)return;
+  const sets=parseInt(el.dataset.sets);let hd=false;
+  for(let s=0;s<sets;s++){const st=FB[fbk(meso,week,sess,di,ei,s)]||{};if(st.kg!=null||st.completed!==undefined||st.rpe)hd=true;}
+  if(!hd){el.classList.remove('show');return;}
+  el.classList.add('show');
+  let nw=week,ns=sess+1;
+  const md=M[meso];if(ns>=md.sessPerWeek){nw=week+1;ns=0;}
+  const r=calcNext(meso,nw,ns,di,ei);
+  if(!r){el.innerHTML='⚡ Inserisci carico e RPE.';return;}
+  const C={up:['rgba(232,255,71,.05)','rgba(232,255,71,.2)','#86efac'],hold:['rgba(251,146,60,.05)','rgba(251,146,60,.2)','#fdba74'],down:['rgba(248,113,113,.05)','rgba(248,113,113,.2)','#fca5a5'],dl:['rgba(139,92,246,.05)','rgba(139,92,246,.2)','#c4b5fd'],warn:['rgba(251,191,36,.05)','rgba(251,191,36,.2)','#fde68a']};
+  const c=C[r.type]||C.warn;
+  el.style.background=c[0];el.style.borderColor=c[1];el.style.color=c[2];
+  const ndl=md.dl.includes(nw);
+  const sl=md.sessLabel[ns]||`SESS ${ns+1}`;
+  el.innerHTML=`<strong>PROSSIMA (${sl}${ndl?' — ⚡ DELOAD':''}):</strong> ${r.lbl}`;
+}
+function updNextSg(meso,week,sess,di,ei){
+  let nw=week,ns=sess+1;
+  const md=M[meso];if(ns>=md.sessPerWeek){nw=week+1;ns=0;}
+  const el=document.getElementById(`sg-${meso}-w${nw}-s${ns}-d${di}-e${ei}`);if(!el)return;
+  const r=calcNext(meso,nw,ns,di,ei);
+  if(r){el.className=`sw${swCls(r.type)}`;el.textContent=r.lbl;}
+}
+function updSessTab(meso,week,sess){
+  const el=document.getElementById(`stab-${meso}-w${week}-s${sess}`);if(!el)return;
+  const sp=el.querySelector('.s-status');if(sp)sp.textContent=isSessDone(meso,week,sess)?'✓ FATTO':'—';
+}
+function lkW(inp){
+  const{meso,week,sess,di,ei,si}=inp.dataset;const v=parseFloat(inp.value);
+  const k=fbk(meso,+week,+sess,+di,+ei,+si);
+  if(!isNaN(v)&&v>0){
+    if(!FB[k])FB[k]={};FB[k].kg=v;save();inp.disabled=true;inp.className='wi';
+    const ed=document.getElementById(`ed-${k}`);if(ed)ed.style.display='';
+    updAdv(meso,+week,+sess,+di,+ei);updNextSg(meso,+week,+sess,+di,+ei);
+  }
+}
+function ulW(k){const i=document.getElementById(`wi-${k}`);const e=document.getElementById(`ed-${k}`);if(i){i.disabled=false;i.focus();i.select();}if(e)e.style.display='none';}
+function tD(id){document.getElementById(id).classList.toggle('open');}
+
+// NAVIGATION
+let cDef='m1',cMass='m4',cWkD=1,cWkM=1;
+function buildWkNav(navId,meso,cWk,cb){
+  const md=M[meso];const nav=document.getElementById(navId);
+  nav.innerHTML=`<span class="wlbl">Sett.:</span>`;
+  for(let w=1;w<=md.weeks;w++){
+    const isDl=md.dl.includes(w);
+    const b=document.createElement('button');
+    b.className='wbtn'+(isDl?' dl':'')+(w===cWk?' active':'');
+    b.textContent=`${w}${isDl?'🔄':''}`;
+    b.onclick=()=>cb(w,b,navId);
+    nav.appendChild(b);
+  }
+}
+function selWk(w,btn,navId){
+  document.querySelectorAll(`#${navId} .wbtn`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const isDef=navId==='wnDef';
+  if(isDef){cWkD=w;document.getElementById('defCont').innerHTML=renderWeek(cDef,w);}
+  else{cWkM=w;document.getElementById('massCont').innerHTML=renderWeek(cMass,w);}
+  document.getElementById('wkBadge').textContent=`S.${w}`;
+}
+function selMDef(meso,btn){
+  document.querySelectorAll('#mnDef .mbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  cDef=meso;cWkD=1;buildWkNav('wnDef',meso,1,selWk);
+  document.getElementById('defCont').innerHTML=renderWeek(meso,1);
+  document.getElementById('wkBadge').textContent='S.1';
+  document.getElementById('mesoBadge').textContent=M[meso].badge;
+}
+function selMMass(meso,btn){
+  document.querySelectorAll('#mnMass .mbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  cMass=meso;cWkM=1;buildWkNav('wnMass',meso,1,selWk);
+  document.getElementById('massCont').innerHTML=renderWeek(meso,1);
+  document.getElementById('wkBadge').textContent='S.1';
+  document.getElementById('mesoBadge').textContent=M[meso].badge;
+}
+function switchTab(name,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.bnt').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');btn.classList.add('active');
+  document.getElementById('wkBadge').textContent=name==='def'?`S.${cWkD}`:name==='mass'?`S.${cWkM}`:'';
+  document.getElementById('mesoBadge').textContent=name==='def'?M[cDef].badge:name==='mass'?M[cMass].badge:'TOSE';
+}
+function togglePhase(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
+buildWkNav('wnDef','m1',1,selWk);
+document.getElementById('defCont').innerHTML=renderWeek('m1',1);
+buildWkNav('wnMass','m4',1,selWk);
+document.getElementById('massCont').innerHTML=renderWeek('m4',1);
+</script>
+</body>
+</html>
